@@ -10,27 +10,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Android 14 – 常用内核分支
+          # Android 14
           - android_version: "14"
             kernel_version: "6.1"
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "android14-6.1"
 
-          # Android 15 – 官方 GKI 分支
+          # Android 15
           - android_version: "15"
             kernel_version: "6.6"
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "common-android15-6.6"
 
-        
+          
 
     steps:
       - name: Checkout 代码
         uses: actions/checkout@v4
 
-      - name: 编译驱动 (Android ${{ matrix.android_version }} | 内核 ${{ matrix.kernel_branch }})
+      # ✅ 新增：安装 lyenv 及相关依赖
+      - name: Install lyenv
+        run: |
+          pip install lyenv PyYAML
+          # 设置 LYENV_HOME，kade 插件会安装到这里
+          echo "LYENV_HOME=$HOME/.lyenv" >> $GITHUB_ENV
+
+      # 确保后续步骤能读到刚刚设置的 LYENV_HOME
+      - name: 编译驱动 (Android ${{ matrix.android_version }})
         env:
-          # 传递给 kadeflow.yaml / kade 插件的环境变量
           ANDROID_VERSION: ${{ matrix.android_version }}
           KERNEL_VERSION: ${{ matrix.kernel_version }}
           KERNEL_REPO: ${{ matrix.kernel_repo }}
@@ -44,5 +51,3 @@ jobs:
           name: hook_driver_Android${{ matrix.android_version }}
           path: |
             *.ko
-            # 若产物在别的路径，请修改，例如：
-            # ${LYENV_HOME}/workspace/exports/**
