@@ -22,11 +22,7 @@ jobs:
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "common-android15-6.6"
 
-          # Android 16 – 目前最新（分支名称可能会变，可自行核对）
-          - android_version: "16"
-            kernel_version: "6.12"
-            kernel_repo: "https://android.googlesource.com/kernel/common"
-            kernel_branch: "common-android16-6.12"
+        
 
     steps:
       - name: Checkout 代码
