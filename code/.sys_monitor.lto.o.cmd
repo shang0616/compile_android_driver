@@ -1,0 +1,1 @@
+cmd_/home/shan/android-kernel/HOOK/sys_monitor.lto.o := ld.lld -EL  -maarch64elf -z norelro --thinlto-cache-dir=/home/shan/android-kernel/HOOK/.thinlto-cache -mllvm -import-instr-limit=5 -z noexecstack   -r -o /home/shan/android-kernel/HOOK/sys_monitor.lto.o  --whole-archive /home/shan/android-kernel/HOOK/sys_monitor.o
