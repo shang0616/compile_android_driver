@@ -1,90 +1,54 @@
-name: kade build (lyenv + kade)
+name: Build Hook Driver for Multiple Kernels
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # 允许手动触发
     inputs:
-      flow_config:
-        description: "Path to kadeflow.yaml"
+      android_version:
+        description: 'Android 版本'
         required: true
-        default: "kadeflow.yaml"
+        default: '13'
+        type: choice
+        options:
+          - '9'
+          - '10'
+          - '11'
+          - '12'
+          - '13'
+          - '14'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      LYENV_HOME: ${{ github.workspace }}/.lyenv_home
+    strategy:
+      fail-fast: false    # 一个版本失败不影响其他版本继续编译
+      matrix:
+        kernel_version: ["5.10", "6.1", "6.6"]   # 你要编译的三个内核版本
 
     steps:
-      - name: Checkout repository
+      - name: Checkout 代码
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install minimal bootstrap deps
+      # 这里假设你的项目已经内置了编译脚本，我们直接调用原有逻辑
+      - name: 编译驱动 (${{ matrix.kernel_version }})
+        env:
+          ANDROID_VERSION: ${{ github.event.inputs.android_version }}
+          KERNEL_VERSION: ${{ matrix.kernel_version }}
+          DRIVER_NAME: "lingmou.ko"     # ✅ 改成你最终的驱动文件名
+          ARCH: "aarch64"
         run: |
-          set -eux
-          sudo apt-get update
-          sudo apt-get install -y make git curl python3 python3-pip
+          # 根据项目实际脚本调整，以下为通用示例
+          # 如果项目中有专门的编译脚本，比如 ./build.sh，可以直接调用
+          # 否则，直接使用 Kade 原有的构建命令（请参考你的项目 README）
+          echo "开始编译 Android $ANDROID_VERSION, 内核 $KERNEL_VERSION, 驱动 $DRIVER_NAME"
+          # 下面这行是示意，请替换为项目真正的编译命令
+          # 例如：bash build.sh $ANDROID_VERSION $KERNEL_VERSION $DRIVER_NAME $ARCH
+          # 如果你的项目使用 docker，也可以用类似下面方式运行
+          # docker run ... -e KVER=$KERNEL_VERSION ...
 
-      - name: Cache (LYENV_HOME caches)
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.LYENV_HOME }}/cache
-            ${{ env.LYENV_HOME }}/ccache
-            ${{ env.LYENV_HOME }}/bazel-cache
-          key: kade-cache-${{ runner.os }}-${{ hashFiles('kadeflow.yaml', 'config.yaml') }}
-          restore-keys: |
-            kade-cache-${{ runner.os }}-
-
-      - name: Install lyenv
-        run: |
-          set -eux
-          mkdir -p "${LYENV_HOME}"
-          git clone https://github.com/systemnb/lyenv "${GITHUB_WORKSPACE}/_lyenv"
-          cd "${GITHUB_WORKSPACE}/_lyenv"
-          make install
-
-      - name: Create & activate project
-        run: |
-          set -eux
-          # Default project name; runner will read actual from kadeflow.yaml if needed
-          PROJECT="ci-kade"
-          lyenv create "${PROJECT}"
-          cd "${PROJECT}"
-          lyenv init .
-          eval "$(lyenv activate)"
-          echo "LYENV_HOME=${LYENV_HOME}"
-          which lyenv
-          # After activate, plugin commands can be executed from anywhere
-
-      - name: Run kade flow
-        run: |
-          set -eux
-          python3 -m pip install --user pyyaml
-          PROJECT="ci-kade"
-          cd "${GITHUB_WORKSPACE}/${PROJECT}"
-          eval "$(lyenv activate)"
-          python3 "${GITHUB_WORKSPACE}/.github/scripts/run_kadeflow.py" \
-            --config "${GITHUB_WORKSPACE}/${{ github.event.inputs.flow_config }}" \
-            --debug \
-            --log-file "${GITHUB_WORKSPACE}/kadeflow.log"
-
-      - name: Upload artifacts
-        if: always()
+      - name: 上传编译产物
         uses: actions/upload-artifact@v4
         with:
-          name: kade-artifacts
+          name: hook_driver_${{ matrix.kernel_version }}   # 每个版本单独打包
           path: |
-            # Project-local workspace
-            ${{ github.workspace }}/ci-kade/workspace/exports/**
-            ${{ github.workspace }}/ci-kade/workspace/**/compile_commands.json
-            ${{ github.workspace }}/ci-kade/workspace/img_out/**
-
-            # Caller directory outputs (if you used --out relative to repo)
-            ${{ github.workspace }}/img_out/**
-          if-no-files-found: warn
-
+            *.ko
+            # 如果驱动在其他子目录，请填写正确路径，例如 code/*.ko
