@@ -1,56 +1,52 @@
-name: Build Hook Driver for Multiple Kernels
+name: Build Hook Driver (Multi-Android)
 
 on:
-  workflow_dispatch:   # 允许手动触发
-    inputs:
-      a      android_version:
-        description: 'Android 版本'
-        required: true
-        default: '13'
-        type: choice
-        options:
-          - '9'
-          - '10'
-          - '11'
-          - '12'
-          - '13'
-          - '14'
-          - '15'    # ✅ 加上
-          - '16'    # ✅ 加上
+  workflow_dispatch:          # 手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false    # 一个版本失败不影响其他版本继续编译
+      fail-fast: false
       matrix:
-        kernel_version: ["5.10", "6.1", "6.6"]   # 你要编译的三个内核版本
+        include:
+          # Android 14 – 常用内核分支
+          - android_version: "14"
+            kernel_version: "6.1"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "android14-6.1"
+
+          # Android 15 – 官方 GKI 分支
+          - android_version: "15"
+            kernel_version: "6.6"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "common-android15-6.6"
+
+          # Android 16 – 目前最新（分支名称可能会变，可自行核对）
+          - android_version: "16"
+            kernel_version: "6.12"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "common-android16-6.12"
 
     steps:
       - name: Checkout 代码
         uses: actions/checkout@v4
 
-      # 这里假设你的项目已经内置了编译脚本，我们直接调用原有逻辑
-      - name: 编译驱动 (${{ matrix.kernel_version }})
+      - name: 编译驱动 (Android ${{ matrix.android_version }} | 内核 ${{ matrix.kernel_branch }})
         env:
-          ANDROID_VERSION: ${{ github.event.inputs.android_version }}
+          # 传递给 kadeflow.yaml / kade 插件的环境变量
+          ANDROID_VERSION: ${{ matrix.android_version }}
           KERNEL_VERSION: ${{ matrix.kernel_version }}
-          DRIVER_NAME: "lingmou.ko"     # ✅ 改成你最终的驱动文件名
-          ARCH: "aarch64"
+          KERNEL_REPO: ${{ matrix.kernel_repo }}
+          KERNEL_BRANCH: ${{ matrix.kernel_branch }}
         run: |
-          # 根据项目实际脚本调整，以下为通用示例
-          # 如果项目中有专门的编译脚本，比如 ./build.sh，可以直接调用
-          # 否则，直接使用 Kade 原有的构建命令（请参考你的项目 README）
-          echo "开始编译 Android $ANDROID_VERSION, 内核 $KERNEL_VERSION, 驱动 $DRIVER_NAME"
-          # 下面这行是示意，请替换为项目真正的编译命令
-          # 例如：bash build.sh $ANDROID_VERSION $KERNEL_VERSION $DRIVER_NAME $ARCH
-          # 如果你的项目使用 docker，也可以用类似下面方式运行
-          # docker run ... -e KVER=$KERNEL_VERSION ...
+          python3 .github/scripts/run_kadeflow.py --config kadeflow.yaml
 
       - name: 上传编译产物
         uses: actions/upload-artifact@v4
         with:
-          name: hook_driver_${{ matrix.kernel_version }}   # 每个版本单独打包
+          name: hook_driver_Android${{ matrix.android_version }}
           path: |
             *.ko
-            # 如果驱动在其他子目录，请填写正确路径，例如 code/*.ko
+            # 若产物在别的路径，请修改，例如：
+            # ${LYENV_HOME}/workspace/exports/**
