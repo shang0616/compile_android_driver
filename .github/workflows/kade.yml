@@ -1,90 +1,71 @@
-name: kade build (lyenv + kade)
+name: Build Hook Driver (Multi-Android)
 
 on:
   workflow_dispatch:
-    inputs:
-      flow_config:
-        description: "Path to kadeflow.yaml"
-        required: true
-        default: "kadeflow.yaml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - android_version: "14"
+            kernel_version: "6.1"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "android14-6.1"
+
+          - android_version: "15"
+            kernel_version: "6.6"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "common-android15-6.6"
+
+          - android_version: "16"
+            kernel_version: "6.12"
+            kernel_repo: "https://android.googlesource.com/kernel/common"
+            kernel_branch: "common-android16-6.12"
+
     env:
-      LYENV_HOME: ${{ github.workspace }}/.lyenv_home
+      LYENV_HOME: ${{ github.workspace }}/ci-kade
 
     steps:
-      - name: Checkout repository
+      - name: Checkout 代码
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install minimal bootstrap deps
+      - name: 安装系统依赖
         run: |
-          set -eux
           sudo apt-get update
           sudo apt-get install -y make git curl python3 python3-pip
 
-      - name: Cache (LYENV_HOME caches)
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.LYENV_HOME }}/cache
-            ${{ env.LYENV_HOME }}/ccache
-            ${{ env.LYENV_HOME }}/bazel-cache
-          key: kade-cache-${{ runner.os }}-${{ hashFiles('kadeflow.yaml', 'config.yaml') }}
-          restore-keys: |
-            kade-cache-${{ runner.os }}-
-
-      - name: Install lyenv
+      - name: 安装 lyenv
         run: |
-          set -eux
-          mkdir -p "${LYENV_HOME}"
           git clone https://github.com/systemnb/lyenv "${GITHUB_WORKSPACE}/_lyenv"
           cd "${GITHUB_WORKSPACE}/_lyenv"
           make install
 
-      - name: Create & activate project
+      - name: 安装 Python 依赖
+        run: python3 -m pip install --user pyyaml
+
+      - name: 编译驱动 (Android ${{ matrix.android_version }})
+        env:
+          ANDROID_VERSION: ${{ matrix.android_version }}
+          KERNEL_VERSION: ${{ matrix.kernel_version }}
+          KERNEL_REPO: ${{ matrix.kernel_repo }}
+          KERNEL_BRANCH: ${{ matrix.kernel_branch }}
         run: |
-          set -eux
-          # Default project name; runner will read actual from kadeflow.yaml if needed
           PROJECT="ci-kade"
           lyenv create "${PROJECT}"
           cd "${PROJECT}"
           lyenv init .
           eval "$(lyenv activate)"
-          echo "LYENV_HOME=${LYENV_HOME}"
-          which lyenv
-          # After activate, plugin commands can be executed from anywhere
-
-      - name: Run kade flow
-        run: |
-          set -eux
-          python3 -m pip install --user pyyaml
-          PROJECT="ci-kade"
-          cd "${GITHUB_WORKSPACE}/${PROJECT}"
-          eval "$(lyenv activate)"
           python3 "${GITHUB_WORKSPACE}/.github/scripts/run_kadeflow.py" \
-            --config "${GITHUB_WORKSPACE}/${{ github.event.inputs.flow_config }}" \
-            --debug \
-            --log-file "${GITHUB_WORKSPACE}/kadeflow.log"
+            --config "${GITHUB_WORKSPACE}/kadeflow.yaml"
 
-      - name: Upload artifacts
+      - name: 上传编译产物
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kade-artifacts
+          name: hook_driver_Android${{ matrix.android_version }}
           path: |
-            # Project-local workspace
             ${{ github.workspace }}/ci-kade/workspace/exports/**
-            ${{ github.workspace }}/ci-kade/workspace/**/compile_commands.json
-            ${{ github.workspace }}/ci-kade/workspace/img_out/**
-
-            # Caller directory outputs (if you used --out relative to repo)
             ${{ github.workspace }}/img_out/**
-          if-no-files-found: warn
-
