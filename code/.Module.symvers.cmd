@@ -1,1 +1,1 @@
-cmd_/home/shan/android-kernel/HOOK/Module.symvers := sed 's/\.ko$$/.lto\.o/' /home/shan/android-kernel/HOOK/modules.order | scripts/mod/modpost -m  -E  -o /home/shan/android-kernel/HOOK/Module.symvers -e -i Module.symvers   -T -
+cmd_/home/shan/android-kernel/HOOK/Module.symvers := sed 's/\.ko$$/\.o/' /home/shan/android-kernel/HOOK/modules.order | scripts/mod/modpost -m  -E  -o /home/shan/android-kernel/HOOK/Module.symvers -e    -T -

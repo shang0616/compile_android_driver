@@ -1,10 +1,8 @@
-cmd_/home/shan/android-kernel/HOOK/vfs_core.mod.o := clang -Wp,-MMD,/home/shan/android-kernel/HOOK/.vfs_core.mod.o.d -nostdinc -isystem /home/shan/android-kernel/prebuilts-master/clang/host/linux-x86/clang-r416183b/lib64/clang/12.0.5/include -I/home/shan/android-kernel/common/arch/arm64/include -I./arch/arm64/include/generated -I/home/shan/android-kernel/common/include -I./include -I/home/shan/android-kernel/common/arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I/home/shan/android-kernel/common/include/uapi -I./include/generated/uapi -include /home/shan/android-kernel/common/include/linux/kconfig.h -include /home/shan/android-kernel/common/include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT= -Qunused-arguments -fmacro-prefix-map=/home/shan/android-kernel/common/= -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Wno-format-security -std=gnu89 --target=aarch64-linux-gnu --prefix=/usr/bin/aarch64-linux-gnu- --gcc-toolchain=/usr -fintegrated-as -Werror=unknown-warning-option -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -Wno-psabi -fno-asynchronous-unwind-tables -fno-unwind-tables -mbranch-protection=pac-ret+leaf+bti -Wa,-march=armv8.5-a -DARM64_ASM_ARCH='"armv8.5-a"' -ffixed-x18 -DKASAN_SHADOW_SCALE_SHIFT= -fno-delete-null-pointer-checks -Wno-frame-address -Wno-address-of-packed-member -O2 -Wframe-larger-than=2048 -fstack-protector-strong -Werror -Wno-format-invalid-specifier -Wno-gnu -mno-global-merge -Wno-unused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang -g -gdwarf-4 -fsanitize=shadow-call-stack -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-array-bounds -fno-strict-overflow -fno-stack-check -Werror=date-time -Werror=incompatible-pointer-types -Wno-initializer-overrides -Wno-format -Wno-sign-compare -Wno-format-zero-length -Wno-pointer-to-enum-cast -Wno-tautological-constant-out-of-range-compare -Wno-enum-compare-conditional -Wno-enum-enum-conversion -fsanitize=array-bounds -fsanitize=local-bounds -fsanitize-undefined-trap-on-error -DMODULE -DKBUILD_BASENAME='"vfs_core.mod"' -DKBUILD_MODNAME='"vfs_core"' -D__KBUILD_MODNAME=kmod_vfs_core -c -o /home/shan/android-kernel/HOOK/vfs_core.mod.o /home/shan/android-kernel/HOOK/vfs_core.mod.c
+cmd_/home/shan/android-kernel/HOOK/src/syscall_block.o := clang -Wp,-MMD,/home/shan/android-kernel/HOOK/src/.syscall_block.o.d -nostdinc -isystem /home/shan/android-kernel/prebuilts-master/clang/host/linux-x86/clang-r416183b/lib64/clang/12.0.5/include -I/home/shan/android-kernel/common/arch/arm64/include -I./arch/arm64/include/generated -I/home/shan/android-kernel/common/include -I./include -I/home/shan/android-kernel/common/arch/arm64/include/uapi -I./arch/arm64/include/generated/uapi -I/home/shan/android-kernel/common/include/uapi -I./include/generated/uapi -include /home/shan/android-kernel/common/include/linux/kconfig.h -include /home/shan/android-kernel/common/include/linux/compiler_types.h -D__KERNEL__ -mlittle-endian -DKASAN_SHADOW_SCALE_SHIFT= -Qunused-arguments -fmacro-prefix-map=/home/shan/android-kernel/common/= -Wall -Wundef -Werror=strict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -fshort-wchar -fno-PIE -Werror=implicit-function-declaration -Werror=implicit-int -Werror=return-type -Wno-format-security -std=gnu89 --target=aarch64-linux-gnu --prefix=/usr/bin/aarch64-linux-gnu- --gcc-toolchain=/usr -fintegrated-as -Werror=unknown-warning-option -mgeneral-regs-only -DCONFIG_CC_HAS_K_CONSTRAINT=1 -Wno-psabi -fno-asynchronous-unwind-tables -fno-unwind-tables -mbranch-protection=pac-ret+leaf+bti -Wa,-march=armv8.5-a -DARM64_ASM_ARCH='"armv8.5-a"' -ffixed-x18 -DKASAN_SHADOW_SCALE_SHIFT= -fno-delete-null-pointer-checks -Wno-frame-address -Wno-address-of-packed-member -O2 -Wframe-larger-than=2048 -fstack-protector-strong -Werror -Wno-format-invalid-specifier -Wno-gnu -mno-global-merge -Wno-unused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang -g -gdwarf-4 -fsanitize=shadow-call-stack -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-array-bounds -fno-strict-overflow -fno-stack-check -Werror=date-time -Werror=incompatible-pointer-types -Wno-initializer-overrides -Wno-format -Wno-sign-compare -Wno-format-zero-length -Wno-pointer-to-enum-cast -Wno-tautological-constant-out-of-range-compare -Wno-enum-compare-conditional -Wno-enum-enum-conversion -I/home/shan/android-kernel/HOOK/include -DMODULE_NAME=\"vfs_core\" -O2 -fno-strict-aliasing -fno-common -fno-delete-null-pointer-checks  -fsanitize=array-bounds -fsanitize=local-bounds -fsanitize-undefined-trap-on-error  -DMODULE  -DKBUILD_BASENAME='"syscall_block"' -DKBUILD_MODNAME='"vfs_core"' -D__KBUILD_MODNAME=kmod_vfs_core -c -o /home/shan/android-kernel/HOOK/src/syscall_block.o /home/shan/android-kernel/HOOK/src/syscall_block.c
 
-source_/home/shan/android-kernel/HOOK/vfs_core.mod.o := /home/shan/android-kernel/HOOK/vfs_core.mod.c
+source_/home/shan/android-kernel/HOOK/src/syscall_block.o := /home/shan/android-kernel/HOOK/src/syscall_block.c
 
-deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o := \
-    $(wildcard include/config/module/unload.h) \
-    $(wildcard include/config/retpoline.h) \
+deps_/home/shan/android-kernel/HOOK/src/syscall_block.o := \
   /home/shan/android-kernel/common/include/linux/kconfig.h \
     $(wildcard include/config/cc/version/text.h) \
     $(wildcard include/config/cpu/big/endian.h) \
@@ -18,6 +16,7 @@ deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o := \
   /home/shan/android-kernel/common/include/linux/compiler-clang.h \
     $(wildcard include/config/arch/use/builtin/bswap.h) \
   /home/shan/android-kernel/common/arch/arm64/include/asm/compiler.h \
+  /home/shan/android-kernel/HOOK/include/teargame.h \
   /home/shan/android-kernel/common/include/linux/module.h \
     $(wildcard include/config/modules.h) \
     $(wildcard include/config/sysfs.h) \
@@ -37,8 +36,10 @@ deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o := \
     $(wildcard include/config/ftrace/mcount/record.h) \
     $(wildcard include/config/kprobes.h) \
     $(wildcard include/config/have/static/call/inline.h) \
+    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/function/error/injection.h) \
+    $(wildcard include/config/retpoline.h) \
     $(wildcard include/config/module/sig.h) \
   /home/shan/android-kernel/common/include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
@@ -849,13 +850,350 @@ deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o := \
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  /home/shan/android-kernel/common/include/linux/build-salt.h \
-    $(wildcard include/config/build/salt.h) \
-  /home/shan/android-kernel/common/include/linux/elfnote.h \
-  /home/shan/android-kernel/common/include/linux/vermagic.h \
-  include/generated/utsrelease.h \
-  /home/shan/android-kernel/common/arch/arm64/include/asm/vermagic.h \
+  /home/shan/android-kernel/common/include/linux/slab.h \
+    $(wildcard include/config/debug/slab.h) \
+    $(wildcard include/config/failslab.h) \
+    $(wildcard include/config/have/hardened/usercopy/allocator.h) \
+    $(wildcard include/config/slab.h) \
+    $(wildcard include/config/slub.h) \
+    $(wildcard include/config/slob.h) \
+  /home/shan/android-kernel/common/include/linux/overflow.h \
+  /home/shan/android-kernel/common/include/linux/percpu-refcount.h \
+  /home/shan/android-kernel/common/include/linux/kasan.h \
+    $(wildcard include/config/kasan/stack.h) \
+    $(wildcard include/config/kasan/vmalloc.h) \
+    $(wildcard include/config/kasan/inline.h) \
+  /home/shan/android-kernel/common/include/linux/vmalloc.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/vmalloc.h \
+  /home/shan/android-kernel/common/include/linux/mm.h \
+    $(wildcard include/config/have/arch/mmap/rnd/bits.h) \
+    $(wildcard include/config/have/arch/mmap/rnd/compat/bits.h) \
+    $(wildcard include/config/mem/soft/dirty.h) \
+    $(wildcard include/config/arch/uses/high/vma/flags.h) \
+    $(wildcard include/config/arch/has/pkeys.h) \
+    $(wildcard include/config/ppc.h) \
+    $(wildcard include/config/x86.h) \
+    $(wildcard include/config/parisc.h) \
+    $(wildcard include/config/sparc64.h) \
+    $(wildcard include/config/arm64.h) \
+    $(wildcard include/config/have/arch/userfaultfd/minor.h) \
+    $(wildcard include/config/shmem.h) \
+    $(wildcard include/config/dev/pagemap/ops.h) \
+    $(wildcard include/config/device/private.h) \
+    $(wildcard include/config/pci/p2pdma.h) \
+    $(wildcard include/config/arch/has/pte/special.h) \
+    $(wildcard include/config/arch/has/pte/devmap.h) \
+    $(wildcard include/config/debug/vm/rb.h) \
+    $(wildcard include/config/page/poisoning.h) \
+    $(wildcard include/config/debug/pagealloc.h) \
+    $(wildcard include/config/arch/has/set/direct/map.h) \
+    $(wildcard include/config/hibernation.h) \
+    $(wildcard include/config/hugetlbfs.h) \
+    $(wildcard include/config/mapping/dirty/helpers.h) \
+  /home/shan/android-kernel/common/include/linux/mmap_lock.h \
+  /home/shan/android-kernel/common/include/linux/range.h \
+  /home/shan/android-kernel/common/include/linux/page_ext.h \
+    $(wildcard include/config/page/pinner.h) \
+  /home/shan/android-kernel/common/include/linux/stacktrace.h \
+    $(wildcard include/config/stacktrace.h) \
+    $(wildcard include/config/arch/stackwalk.h) \
+    $(wildcard include/config/have/reliable/stacktrace.h) \
+  /home/shan/android-kernel/common/include/linux/stackdepot.h \
+    $(wildcard include/config/stackdepot.h) \
+  /home/shan/android-kernel/common/include/linux/page_ref.h \
+    $(wildcard include/config/debug/page/ref.h) \
+  /home/shan/android-kernel/common/include/linux/memremap.h \
+  /home/shan/android-kernel/common/include/linux/ioport.h \
+    $(wildcard include/config/io/strict/devmem.h) \
+  /home/shan/android-kernel/common/include/linux/pgtable.h \
+    $(wildcard include/config/highpte.h) \
+    $(wildcard include/config/have/arch/transparent/hugepage/pud.h) \
+    $(wildcard include/config/have/arch/soft/dirty.h) \
+    $(wildcard include/config/arch/enable/thp/migration.h) \
+    $(wildcard include/config/have/arch/huge/vmap.h) \
+    $(wildcard include/config/x86/espfix64.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/pgtable.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/proc-fns.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/pgtable-prot.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/tlbflush.h \
+    $(wildcard include/config/arm64/workaround/repeat/tlbi.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/fixmap.h \
+    $(wildcard include/config/acpi/apei/ghes.h) \
+    $(wildcard include/config/arm/sde/interface.h) \
+    $(wildcard include/config/unmap/kernel/at/el0.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/boot.h \
+  /home/shan/android-kernel/common/include/asm-generic/fixmap.h \
+  /home/shan/android-kernel/common/include/asm-generic/pgtable_uffd.h \
+    $(wildcard include/config/have/arch/userfaultfd/wp.h) \
+  /home/shan/android-kernel/common/include/linux/page_pinner.h \
+  /home/shan/android-kernel/common/include/linux/huge_mm.h \
+  /home/shan/android-kernel/common/include/linux/sched/coredump.h \
+    $(wildcard include/config/core/dump/default/elf/headers.h) \
+  /home/shan/android-kernel/common/include/linux/vmstat.h \
+    $(wildcard include/config/vm/event/counters.h) \
+    $(wildcard include/config/debug/tlbflush.h) \
+    $(wildcard include/config/debug/vm/vmacache.h) \
+  /home/shan/android-kernel/common/include/linux/vm_event_item.h \
+    $(wildcard include/config/memory/balloon.h) \
+    $(wildcard include/config/balloon/compaction.h) \
+  /home/shan/android-kernel/common/include/linux/sched/mm.h \
+    $(wildcard include/config/arch/has/membarrier/callbacks.h) \
+  /home/shan/android-kernel/common/include/linux/sync_core.h \
+    $(wildcard include/config/arch/has/sync/core/before/usermode.h) \
+  /home/shan/android-kernel/common/include/linux/input.h \
+  /home/shan/android-kernel/common/include/uapi/linux/input.h \
+  /home/shan/android-kernel/common/include/uapi/linux/input-event-codes.h \
+  /home/shan/android-kernel/common/include/linux/device.h \
+    $(wildcard include/config/debug/devres.h) \
+    $(wildcard include/config/energy/model.h) \
+    $(wildcard include/config/generic/msi/irq/domain.h) \
+    $(wildcard include/config/pinctrl.h) \
+    $(wildcard include/config/generic/msi/irq.h) \
+    $(wildcard include/config/dma/ops.h) \
+    $(wildcard include/config/dma/declare/coherent.h) \
+    $(wildcard include/config/dma/cma.h) \
+    $(wildcard include/config/arch/has/sync/dma/for/device.h) \
+    $(wildcard include/config/arch/has/sync/dma/for/cpu.h) \
+    $(wildcard include/config/arch/has/sync/dma/for/cpu/all.h) \
+    $(wildcard include/config/dma/ops/bypass.h) \
+    $(wildcard include/config/of.h) \
+    $(wildcard include/config/devtmpfs.h) \
+    $(wildcard include/config/sysfs/deprecated.h) \
+  /home/shan/android-kernel/common/include/linux/dev_printk.h \
+  /home/shan/android-kernel/common/include/linux/energy_model.h \
+  /home/shan/android-kernel/common/include/linux/sched/cpufreq.h \
+    $(wildcard include/config/cpu/freq.h) \
+  /home/shan/android-kernel/common/include/linux/sched/topology.h \
+    $(wildcard include/config/sched/debug.h) \
+    $(wildcard include/config/sched/mc.h) \
+  /home/shan/android-kernel/common/include/linux/sched/idle.h \
+  /home/shan/android-kernel/common/include/linux/sched/sd_flags.h \
+  /home/shan/android-kernel/common/include/linux/klist.h \
+  /home/shan/android-kernel/common/include/linux/pm.h \
+    $(wildcard include/config/vt/console/sleep.h) \
+    $(wildcard include/config/pm.h) \
+    $(wildcard include/config/pm/clk.h) \
+    $(wildcard include/config/pm/generic/domains.h) \
+  /home/shan/android-kernel/common/include/linux/device/bus.h \
+    $(wildcard include/config/acpi.h) \
+  /home/shan/android-kernel/common/include/linux/device/class.h \
+  /home/shan/android-kernel/common/include/linux/device/driver.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/device.h \
+  /home/shan/android-kernel/common/include/linux/pm_wakeup.h \
+  /home/shan/android-kernel/common/include/linux/mod_devicetable.h \
+  /home/shan/android-kernel/common/include/linux/input/mt.h \
+  /home/shan/android-kernel/common/include/linux/kprobes.h \
+    $(wildcard include/config/kretprobes.h) \
+    $(wildcard include/config/kprobes/sanity/test.h) \
+    $(wildcard include/config/optprobes.h) \
+    $(wildcard include/config/kprobes/on/ftrace.h) \
+  /home/shan/android-kernel/common/include/linux/ftrace.h \
+    $(wildcard include/config/function/tracer.h) \
+    $(wildcard include/config/dynamic/ftrace/with/regs.h) \
+    $(wildcard include/config/dynamic/ftrace/with/direct/calls.h) \
+    $(wildcard include/config/have/dynamic/ftrace/with/direct/calls.h) \
+    $(wildcard include/config/stack/tracer.h) \
+    $(wildcard include/config/frame/pointer.h) \
+    $(wildcard include/config/function/profiler.h) \
+    $(wildcard include/config/ftrace/syscalls.h) \
+  /home/shan/android-kernel/common/include/linux/trace_clock.h \
+  arch/arm64/include/generated/asm/trace_clock.h \
+  /home/shan/android-kernel/common/include/asm-generic/trace_clock.h \
+  /home/shan/android-kernel/common/include/linux/kallsyms.h \
+    $(wildcard include/config/kallsyms/all.h) \
+  /home/shan/android-kernel/common/include/linux/ptrace.h \
+  /home/shan/android-kernel/common/include/linux/pid_namespace.h \
+    $(wildcard include/config/pid/ns.h) \
+  /home/shan/android-kernel/common/include/linux/nsproxy.h \
+  /home/shan/android-kernel/common/include/linux/ns_common.h \
+  /home/shan/android-kernel/common/include/uapi/linux/ptrace.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/ftrace.h \
+  /home/shan/android-kernel/common/include/linux/compat.h \
+    $(wildcard include/config/arch/has/syscall/wrapper.h) \
+    $(wildcard include/config/x86/x32/abi.h) \
+    $(wildcard include/config/compat/old/sigaction.h) \
+    $(wildcard include/config/odd/rt/sigaction.h) \
+  /home/shan/android-kernel/common/include/linux/socket.h \
+  arch/arm64/include/generated/uapi/asm/socket.h \
+  /home/shan/android-kernel/common/include/uapi/asm-generic/socket.h \
+  arch/arm64/include/generated/uapi/asm/sockios.h \
+  /home/shan/android-kernel/common/include/uapi/asm-generic/sockios.h \
+  /home/shan/android-kernel/common/include/uapi/linux/sockios.h \
+  /home/shan/android-kernel/common/include/linux/uio.h \
+    $(wildcard include/config/arch/has/copy/mc.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/uio.h \
+  /home/shan/android-kernel/common/include/uapi/linux/socket.h \
+  /home/shan/android-kernel/common/include/uapi/linux/if.h \
+  /home/shan/android-kernel/common/include/uapi/linux/libc-compat.h \
+  /home/shan/android-kernel/common/include/uapi/linux/hdlc/ioctl.h \
+  /home/shan/android-kernel/common/include/uapi/linux/aio_abi.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/syscall_wrapper.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/kprobes.h \
+  /home/shan/android-kernel/common/include/asm-generic/kprobes.h \
+  /home/shan/android-kernel/HOOK/include/teargame_compat.h \
+  include/generated/uapi/linux/version.h \
+  /home/shan/android-kernel/common/include/linux/highmem.h \
+    $(wildcard include/config/x86/32.h) \
+    $(wildcard include/config/debug/highmem.h) \
+  /home/shan/android-kernel/common/include/linux/hardirq.h \
+  /home/shan/android-kernel/common/include/linux/context_tracking_state.h \
+    $(wildcard include/config/context/tracking.h) \
+  /home/shan/android-kernel/common/include/linux/ftrace_irq.h \
+    $(wildcard include/config/hwlat/tracer.h) \
+  /home/shan/android-kernel/common/include/linux/vtime.h \
+    $(wildcard include/config/virt/cpu/accounting.h) \
+    $(wildcard include/config/irq/time/accounting.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/hardirq.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/irq.h \
+  /home/shan/android-kernel/common/include/asm-generic/irq.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/kvm_arm.h \
+  /home/shan/android-kernel/common/include/linux/irq_cpustat.h \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/cacheflush.h \
+  /home/shan/android-kernel/common/include/linux/kgdb.h \
+    $(wildcard include/config/have/arch/kgdb.h) \
+    $(wildcard include/config/kgdb.h) \
+    $(wildcard include/config/serial/kgdb/nmi.h) \
+    $(wildcard include/config/kgdb/honour/blocklist.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/kgdb.h \
+  /home/shan/android-kernel/common/include/asm-generic/cacheflush.h \
+  arch/arm64/include/generated/asm/kmap_types.h \
+  /home/shan/android-kernel/common/include/asm-generic/kmap_types.h \
+  /home/shan/android-kernel/common/include/linux/io.h \
+    $(wildcard include/config/has/ioport/map.h) \
+    $(wildcard include/config/pci.h) \
+  /home/shan/android-kernel/common/arch/arm64/include/asm/io.h \
+  /home/shan/android-kernel/common/include/linux/log_mmiorw.h \
+    $(wildcard include/config/trace/mmio/access.h) \
+  arch/arm64/include/generated/asm/early_ioremap.h \
+  /home/shan/android-kernel/common/include/asm-generic/early_ioremap.h \
+    $(wildcard include/config/generic/early/ioremap.h) \
+  /home/shan/android-kernel/common/include/asm-generic/io.h \
+    $(wildcard include/config/generic/iomap.h) \
+    $(wildcard include/config/generic/ioremap.h) \
+    $(wildcard include/config/virt/to/bus.h) \
+  /home/shan/android-kernel/common/include/asm-generic/pci_iomap.h \
+    $(wildcard include/config/no/generic/pci/ioport/map.h) \
+    $(wildcard include/config/generic/pci/iomap.h) \
+  /home/shan/android-kernel/common/include/linux/logic_pio.h \
+    $(wildcard include/config/indirect/pio.h) \
+  /home/shan/android-kernel/common/include/linux/fwnode.h \
+  /home/shan/android-kernel/HOOK/include/teargame_config.h \
+    $(wildcard include/config/teargame/randomize.h) \
+    $(wildcard include/config/teargame/cache/buckets.h) \
+    $(wildcard include/config/teargame/touch/slots.h) \
+    $(wildcard include/config/teargame/debug.h) \
+    $(wildcard include/config/teargame/shadow/page.h) \
+    $(wildcard include/config/teargame/syscall/block.h) \
+  /home/shan/android-kernel/HOOK/include/teargame_cmd.h \
+  /home/shan/android-kernel/HOOK/include/teargame_types.h \
+  /home/shan/android-kernel/HOOK/include/teargame_security.h \
+  /home/shan/android-kernel/common/include/linux/swap.h \
+    $(wildcard include/config/frontswap.h) \
+    $(wildcard include/config/memcg/swap.h) \
+  /home/shan/android-kernel/common/include/linux/memcontrol.h \
+  /home/shan/android-kernel/common/include/linux/cgroup.h \
+    $(wildcard include/config/cgroup/cpuacct.h) \
+    $(wildcard include/config/sock/cgroup/data.h) \
+    $(wildcard include/config/cgroup/net/prio.h) \
+    $(wildcard include/config/cgroup/net/classid.h) \
+    $(wildcard include/config/cgroup/data.h) \
+    $(wildcard include/config/cgroup/bpf.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/cgroupstats.h \
+  /home/shan/android-kernel/common/include/uapi/linux/taskstats.h \
+  /home/shan/android-kernel/common/include/linux/seq_file.h \
+  /home/shan/android-kernel/common/include/linux/user_namespace.h \
+    $(wildcard include/config/inotify/user.h) \
+    $(wildcard include/config/persistent/keyrings.h) \
+  /home/shan/android-kernel/common/include/linux/kernel_stat.h \
+  /home/shan/android-kernel/common/include/linux/interrupt.h \
+    $(wildcard include/config/irq/forced/threading.h) \
+    $(wildcard include/config/generic/irq/probe.h) \
+    $(wildcard include/config/irq/timings.h) \
+  /home/shan/android-kernel/common/include/linux/irqreturn.h \
+  /home/shan/android-kernel/common/include/linux/cgroup-defs.h \
+  /home/shan/android-kernel/common/include/linux/u64_stats_sync.h \
+  arch/arm64/include/generated/asm/local64.h \
+  /home/shan/android-kernel/common/include/asm-generic/local64.h \
+  arch/arm64/include/generated/asm/local.h \
+  /home/shan/android-kernel/common/include/asm-generic/local.h \
+  /home/shan/android-kernel/common/include/linux/bpf-cgroup.h \
+  /home/shan/android-kernel/common/include/linux/bpf.h \
+    $(wildcard include/config/bpf/jit/always/on.h) \
+    $(wildcard include/config/bpf/stream/parser.h) \
+    $(wildcard include/config/inet.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/bpf.h \
+    $(wildcard include/config/efficient/unaligned/access.h) \
+    $(wildcard include/config/ip/route/classid.h) \
+    $(wildcard include/config/bpf/kprobe/override.h) \
+    $(wildcard include/config/xfrm.h) \
+    $(wildcard include/config/bpf/lirc/mode2.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/bpf_common.h \
+  /home/shan/android-kernel/common/include/linux/file.h \
+  /home/shan/android-kernel/common/include/linux/bpf_types.h \
+    $(wildcard include/config/bpf/lsm.h) \
+    $(wildcard include/config/xdp/sockets.h) \
+  /home/shan/android-kernel/common/include/linux/psi_types.h \
+  /home/shan/android-kernel/common/include/linux/kthread.h \
+  /home/shan/android-kernel/common/include/linux/cgroup_subsys.h \
+    $(wildcard include/config/cgroup/device.h) \
+    $(wildcard include/config/cgroup/freezer.h) \
+    $(wildcard include/config/cgroup/perf.h) \
+    $(wildcard include/config/cgroup/hugetlb.h) \
+    $(wildcard include/config/cgroup/pids.h) \
+    $(wildcard include/config/cgroup/rdma.h) \
+    $(wildcard include/config/cgroup/debug.h) \
+  /home/shan/android-kernel/common/include/linux/page_counter.h \
+  /home/shan/android-kernel/common/include/linux/vmpressure.h \
+  /home/shan/android-kernel/common/include/linux/eventfd.h \
+    $(wildcard include/config/eventfd.h) \
+  /home/shan/android-kernel/common/include/linux/writeback.h \
+  /home/shan/android-kernel/common/include/linux/flex_proportions.h \
+  /home/shan/android-kernel/common/include/linux/backing-dev-defs.h \
+    $(wildcard include/config/debug/fs.h) \
+  /home/shan/android-kernel/common/include/linux/blk_types.h \
+    $(wildcard include/config/blk/cgroup/iocost.h) \
+    $(wildcard include/config/blk/inline/encryption.h) \
+    $(wildcard include/config/dm/default/key.h) \
+    $(wildcard include/config/blk/dev/integrity.h) \
+  /home/shan/android-kernel/common/include/linux/bvec.h \
+  /home/shan/android-kernel/common/include/linux/blk-cgroup.h \
+  /home/shan/android-kernel/common/include/linux/blkdev.h \
+    $(wildcard include/config/blk/rq/alloc/time.h) \
+    $(wildcard include/config/blk/wbt.h) \
+    $(wildcard include/config/blk/dev/zoned.h) \
+    $(wildcard include/config/blk/dev/bsg.h) \
+    $(wildcard include/config/blk/dev/throttling.h) \
+    $(wildcard include/config/blk/debug/fs.h) \
+  /home/shan/android-kernel/common/include/linux/sched/clock.h \
+    $(wildcard include/config/have/unstable/sched/clock.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/major.h \
+  /home/shan/android-kernel/common/include/linux/genhd.h \
+    $(wildcard include/config/fail/make/request.h) \
+    $(wildcard include/config/cdrom.h) \
+  /home/shan/android-kernel/common/include/linux/pagemap.h \
+  /home/shan/android-kernel/common/include/linux/hugetlb_inline.h \
+  /home/shan/android-kernel/common/include/linux/sched/debug.h \
+  /home/shan/android-kernel/common/include/linux/mempool.h \
+  /home/shan/android-kernel/common/include/linux/bio.h \
+  /home/shan/android-kernel/common/include/linux/bsg.h \
+  /home/shan/android-kernel/common/include/uapi/linux/bsg.h \
+  /home/shan/android-kernel/common/include/linux/scatterlist.h \
+    $(wildcard include/config/need/sg/dma/length.h) \
+    $(wildcard include/config/debug/sg.h) \
+    $(wildcard include/config/sgl/alloc.h) \
+    $(wildcard include/config/arch/no/sg/chain.h) \
+    $(wildcard include/config/sg/pool.h) \
+  /home/shan/android-kernel/common/include/uapi/linux/blkzoned.h \
+  /home/shan/android-kernel/common/include/linux/elevator.h \
+  /home/shan/android-kernel/common/include/linux/hashtable.h \
+  /home/shan/android-kernel/common/include/linux/blk-mq.h \
+    $(wildcard include/config/fail/io/timeout.h) \
+  /home/shan/android-kernel/common/include/linux/sbitmap.h \
+  /home/shan/android-kernel/common/include/linux/node.h \
+    $(wildcard include/config/hmem/reporting.h) \
+    $(wildcard include/config/memory/hotplug/sparse.h) \
+  /home/shan/android-kernel/common/include/linux/swapops.h \
 
-/home/shan/android-kernel/HOOK/vfs_core.mod.o: $(deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o)
+/home/shan/android-kernel/HOOK/src/syscall_block.o: $(deps_/home/shan/android-kernel/HOOK/src/syscall_block.o)
 
-$(deps_/home/shan/android-kernel/HOOK/vfs_core.mod.o):
+$(deps_/home/shan/android-kernel/HOOK/src/syscall_block.o):
