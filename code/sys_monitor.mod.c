@@ -43,7 +43,7 @@ __used __section("__versions") = {
 	{ 0xf5f7b498, "kobject_add" },
 	{ 0xf524bddc, "kobject_del" },
 	{ 0x36505ade, "try_module_get" },
-	{ 0xfda9581f, "prandom_u32" },
+	{ 0xfda9581f, "get_random_u32" },
 	{ 0x8ea54251, "unregister_kretprobe" },
 	{ 0x881262d4, "register_kretprobe" },
 	{ 0x3b938c8d, "input_event" },
