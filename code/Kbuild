@@ -1,6 +1,6 @@
 # drivers/file_copy/Kbuild
 
-ccflags-y += -I$(srctree)/drivers/file_copy/include
+ccflags-y += -I$(srctree)/code/file_copy/include
 
 obj-m += vfs_core.o
 vfs_core-objs := \
