@@ -20,7 +20,7 @@ jobs:
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "common-android15-6.6"
 
-          - 
+          -
 
     env:
       LYENV_HOME: ${{ github.workspace }}/ci-kade
