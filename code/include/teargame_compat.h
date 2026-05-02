@@ -102,35 +102,31 @@
  * ============================================================================
  * Kernel Fault Handling Compatibility
  * ============================================================================
- * Linux 5.8+: probe_kernel_read renamed to copy_from_kernel_nofault
+ * GKI/Android kernels may declare copy_to_kernel_nofault but not export it
+ * for loadable modules. Use probe_kernel_* to avoid modpost undefined symbols.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0)
-  static __always_inline long tear_copy_from_kernel_nofault_impl(void *dst, const void *src,
-                                                                 size_t size)
-  {
-      if (unlikely(!dst || !src))
-          return -EFAULT;
-      return copy_from_kernel_nofault(dst, src, size);
-  }
-
-  static __always_inline long tear_copy_to_kernel_nofault_impl(void *dst, const void *src,
+static __always_inline long tear_copy_from_kernel_nofault_impl(void *dst,
+                                                               const void *src,
                                                                size_t size)
-  {
-      if (unlikely(!dst || !src))
-          return -EFAULT;
-      return copy_to_kernel_nofault(dst, src, size);
-  }
+{
+    if (unlikely(!dst || !src))
+        return -EFAULT;
+    return probe_kernel_read(dst, src, size);
+}
 
-  #define tear_copy_from_kernel_nofault(dst, src, size) \
-      tear_copy_from_kernel_nofault_impl((dst), (src), (size))
-  #define tear_copy_to_kernel_nofault(dst, src, size) \
-      tear_copy_to_kernel_nofault_impl((dst), (src), (size))
-#else
-  #define tear_copy_from_kernel_nofault(dst, src, size) \
-      probe_kernel_read(dst, src, size)
-  #define tear_copy_to_kernel_nofault(dst, src, size) \
-      probe_kernel_write(dst, src, size)
-#endif
+static __always_inline long tear_copy_to_kernel_nofault_impl(void *dst,
+                                                             const void *src,
+                                                             size_t size)
+{
+    if (unlikely(!dst || !src))
+        return -EFAULT;
+    return probe_kernel_write(dst, src, size);
+}
+
+#define tear_copy_from_kernel_nofault(dst, src, size) \
+    tear_copy_from_kernel_nofault_impl((dst), (src), (size))
+#define tear_copy_to_kernel_nofault(dst, src, size) \
+    tear_copy_to_kernel_nofault_impl((dst), (src), (size))
 
 /*
  * ============================================================================
