@@ -336,7 +336,7 @@ static int handle_fault(unsigned long addr, unsigned long esr,
 
 /* ---- single-step callback ---- */
 
-static int step_cb(struct pt_regs *regs, unsigned int esr)
+static int step_cb(struct pt_regs *regs, unsigned long esr)
 {
     struct shadow_entry *e;
     bool handled = false;
