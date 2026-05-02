@@ -132,7 +132,7 @@ struct tear_ptw_cache_v2 {
 };
 
 /* 定义 per-CPU 缓存变量 */
-static DEFINE_PER_CPU(struct tear_ptw_cache_v2, ptw_cache_v2);
+static struct tear_ptw_cache_v2 __percpu *ptw_cache_v2;
 
 /*
  * LRU 槽位选择
@@ -178,7 +178,7 @@ static bool ptw_cache_lookup(pid_t pid, unsigned long vaddr,
     int i;
     
     preempt_disable();
-    cache = this_cpu_ptr(&ptw_cache_v2);
+    cache = this_cpu_ptr(ptw_cache_v2);
     
     for (i = 0; i < TEAR_PTW_CACHE_SIZE_V2; i++) {
         struct tear_ptw_cache_entry_v2 *e = &cache->entries[i];
@@ -224,7 +224,7 @@ static void ptw_cache_update(pid_t pid, unsigned long vaddr,
     unsigned int slot;
     
     preempt_disable();
-    cache = this_cpu_ptr(&ptw_cache_v2);
+    cache = this_cpu_ptr(ptw_cache_v2);
     
     /* 使用LRU策略选择槽位 */
     slot = ptw_cache_find_lru_slot(cache);
@@ -249,7 +249,7 @@ static void ptw_cache_invalidate_pid(pid_t pid)
     int cpu;
     
     for_each_possible_cpu(cpu) {
-        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(&ptw_cache_v2, cpu);
+        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(ptw_cache_v2, cpu);
         int i;
         
         for (i = 0; i < TEAR_PTW_CACHE_SIZE_V2; i++) {
@@ -267,7 +267,7 @@ static void ptw_cache_flush_all(void)
     int cpu;
     
     for_each_possible_cpu(cpu) {
-        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(&ptw_cache_v2, cpu);
+        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(ptw_cache_v2, cpu);
         memset(cache, 0, sizeof(*cache));
     }
 }
@@ -281,7 +281,7 @@ void tear_ptw_cache_stats(unsigned long *hits, unsigned long *misses)
     unsigned long total_hits = 0, total_misses = 0;
     
     for_each_possible_cpu(cpu) {
-        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(&ptw_cache_v2, cpu);
+        struct tear_ptw_cache_v2 *cache = per_cpu_ptr(ptw_cache_v2, cpu);
         total_hits += cache->total_hits;
         total_misses += cache->total_misses;
     }
@@ -312,7 +312,7 @@ struct tear_prefetch_state {
 };
 
 /* Per-CPU 预取状态 */
-static DEFINE_PER_CPU(struct tear_prefetch_state, prefetch_state);
+static struct tear_prefetch_state __percpu *prefetch_state;
 
 /*
  * 智能预取
@@ -325,7 +325,7 @@ static __maybe_unused void smart_prefetch(pid_t pid, struct mm_struct *mm, unsig
     int i;
     
     preempt_disable();
-    ps = this_cpu_ptr(&prefetch_state);
+    ps = this_cpu_ptr(prefetch_state);
     
     /* 如果切换了进程，重置状态 */
     if (ps->pid != pid) {
@@ -599,23 +599,51 @@ bool write_process_memory(pid_t pid, unsigned long addr,
 int teargame_memory_init(void)
 {
 #if TEAR_ENABLE_PTW_CACHE
-    /* 初始化 per-CPU 页表缓存 */
+    /* 动态分配 per-CPU 页表缓存 */
+    ptw_cache_v2 = alloc_percpu(struct tear_ptw_cache_v2);
+    if (!ptw_cache_v2) {
+        tear_warn("Failed to allocate percpu ptw_cache_v2\n");
+        return -ENOMEM;
+    }
     ptw_cache_flush_all();
 #endif
+
+#if TEAR_ENABLE_PREFETCH
+    prefetch_state = alloc_percpu(struct tear_prefetch_state);
+    if (!prefetch_state) {
+        tear_warn("Failed to allocate percpu prefetch_state\n");
+#if TEAR_ENABLE_PTW_CACHE
+        free_percpu(ptw_cache_v2);
+#endif
+        return -ENOMEM;
+    }
+#endif
+
     return 0;
 }
 
 void teargame_memory_exit(void)
 {
 #if TEAR_ENABLE_PTW_CACHE
-    unsigned long hits, misses;
-    tear_ptw_cache_stats(&hits, &misses);
-    tear_debug("页表缓存统计: 命中=%lu, 未命中=%lu, 命中率=%.1f%%\n",
-               hits, misses, 
-               (hits + misses) > 0 ? 
-               (100.0 * hits / (hits + misses)) : 0.0);
-    ptw_cache_flush_all();
+    if (ptw_cache_v2) {
+        unsigned long hits, misses;
+        tear_ptw_cache_stats(&hits, &misses);
+        tear_debug("页表缓存统计: 命中=%lu, 未命中=%lu, 命中率=%.1f%%\n",
+                   hits, misses, 
+                   (hits + misses) > 0 ? 
+                   (100.0 * hits / (hits + misses)) : 0.0);
+        free_percpu(ptw_cache_v2);
+        ptw_cache_v2 = NULL;
+    }
 #endif
+
+#if TEAR_ENABLE_PREFETCH
+    if (prefetch_state) {
+        free_percpu(prefetch_state);
+        prefetch_state = NULL;
+    }
+#endif
+
     tear_debug("内存子系统已清理\n");
 }
 

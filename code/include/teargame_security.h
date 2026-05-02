@@ -710,44 +710,36 @@ static inline phys_addr_t tear_vaddr_to_phys_secure(struct mm_struct *mm,
     if (page_size)
         *page_size = PAGE_SIZE;
     
+    /*
+     * Keep mmap lock across VMA+page-table checks to avoid races with
+     * concurrent unmap/mprotect during long-running memory scans.
+     */
+    tear_mmap_read_lock(mm);
+
 #if TEAR_SECURITY_CHECK_VMA
-    /* Full VMA safety check */
     {
-        struct vm_area_struct *vma;
-
-        tear_mmap_read_lock(mm);
-        vma = tear_find_safe_vma(mm, vaddr, write);
-        tear_mmap_read_unlock(mm);
-
+        struct vm_area_struct *vma = tear_find_safe_vma(mm, vaddr, write);
         if (!vma) {
             tear_security_debug("VMA check failed vaddr=0x%lx\n", vaddr);
-
-            return 0;
+            goto out_unlock;
         }
     }
 #elif TEAR_SECURITY_CHECK_TRAP
-    /* Lightweight trap-only check */
     {
-        struct vm_area_struct *vma;
-
-        tear_mmap_read_lock(mm);
-        vma = find_vma(mm, vaddr);
+        struct vm_area_struct *vma = find_vma(mm, vaddr);
         if (vma && vaddr >= vma->vm_start) {
             if (tear_is_vma_trap(vma, write))
                 vma = NULL;
         } else {
             vma = NULL;
         }
-        tear_mmap_read_unlock(mm);
-
         if (!vma) {
             tear_security_debug("Trap detected vaddr=0x%lx\n", vaddr);
-
-            return 0;
+            goto out_unlock;
         }
     }
 #endif
-    
+
     rcu_read_lock();
     
     /* PGD */
@@ -830,6 +822,8 @@ static inline phys_addr_t tear_vaddr_to_phys_secure(struct mm_struct *mm,
     
 out:
     rcu_read_unlock();
+out_unlock:
+    tear_mmap_read_unlock(mm);
     return phys;
 }
 

@@ -69,9 +69,6 @@ int tear_batch_ptw(pid_t pid, struct tear_ptw_batch_entry *entries, int count)
     if (!mm)
         return -ESRCH;
     
-    /* 获取 mmap 锁（只获取一次） */
-    tear_mmap_read_lock(mm);
-    
     /* 批量遍历 */
     for (i = 0; i < count; i++) {
         entries[i].page_size = PAGE_SIZE;
@@ -86,7 +83,6 @@ int tear_batch_ptw(pid_t pid, struct tear_ptw_batch_entry *entries, int count)
         }
     }
     
-    tear_mmap_read_unlock(mm);
     mmput(mm);
     
     return success;
@@ -182,29 +178,8 @@ bool tear_read_zero_copy(pid_t pid, unsigned long addr, void *out_val, size_t si
     /* 计算页内偏移 */
     offset = phys & ~PAGE_MASK;
     
-    /* 直接读取 */
-    switch (size) {
-    case 1:
-        *(u8 *)out_val = *(u8 *)(kaddr + offset);
+    if (tear_copy_from_kernel_nofault(out_val, kaddr + offset, size) == 0)
         success = true;
-        break;
-    case 2:
-        *(u16 *)out_val = *(u16 *)(kaddr + offset);
-        success = true;
-        break;
-    case 4:
-        *(u32 *)out_val = *(u32 *)(kaddr + offset);
-        success = true;
-        break;
-    case 8:
-        *(u64 *)out_val = *(u64 *)(kaddr + offset);
-        success = true;
-        break;
-    default:
-        memcpy(out_val, kaddr + offset, size);
-        success = true;
-        break;
-    }
     
     kunmap_atomic(kaddr);
     return success;
@@ -320,7 +295,11 @@ int tear_scatter_read(pid_t pid, struct tear_scatter_entry *entries, int count)
             if (!kaddr)
                 break;
             
-            memcpy((char *)temp_buf + copied, kaddr + offset, chunk);
+            if (tear_copy_from_kernel_nofault((char *)temp_buf + copied,
+                                              kaddr + offset, chunk) != 0) {
+                kunmap_atomic(kaddr);
+                break;
+            }
             kunmap_atomic(kaddr);
             
             copied += chunk;
@@ -462,7 +441,12 @@ int tear_batch_write(pid_t pid, struct tear_batch_write_entry *entries, int coun
             if (!kaddr)
                 break;
             
-            memcpy(kaddr + offset, (char *)temp_buf + written, chunk);
+            if (tear_copy_to_kernel_nofault(kaddr + offset,
+                                            (char *)temp_buf + written,
+                                            chunk) != 0) {
+                kunmap_atomic(kaddr);
+                break;
+            }
             kunmap_atomic(kaddr);
             
             written += chunk;

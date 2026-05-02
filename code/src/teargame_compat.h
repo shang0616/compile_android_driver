@@ -108,53 +108,17 @@
   static __always_inline long tear_copy_from_kernel_nofault_impl(void *dst, const void *src,
                                                                  size_t size)
   {
-#ifdef CONFIG_ARM64
-      void *d = dst;
-      const void *s = src;
-      size_t len = size;
-
       if (unlikely(!dst || !src))
           return -EFAULT;
-
-      pagefault_disable();
-      while (len >= sizeof(u64)) { __get_kernel_nofault(d, s, u64, Efault); d += sizeof(u64); s += sizeof(u64); len -= sizeof(u64); }
-      while (len >= sizeof(u32)) { __get_kernel_nofault(d, s, u32, Efault); d += sizeof(u32); s += sizeof(u32); len -= sizeof(u32); }
-      while (len >= sizeof(u16)) { __get_kernel_nofault(d, s, u16, Efault); d += sizeof(u16); s += sizeof(u16); len -= sizeof(u16); }
-      while (len >= sizeof(u8))  { __get_kernel_nofault(d, s, u8,  Efault); d += sizeof(u8);  s += sizeof(u8);  len -= sizeof(u8); }
-      pagefault_enable();
-      return 0;
-Efault:
-      pagefault_enable();
-      return -EFAULT;
-#else
       return copy_from_kernel_nofault(dst, src, size);
-#endif
   }
 
   static __always_inline long tear_copy_to_kernel_nofault_impl(void *dst, const void *src,
                                                                size_t size)
   {
-#ifdef CONFIG_ARM64
-      void *d = dst;
-      const void *s = src;
-      size_t len = size;
-
       if (unlikely(!dst || !src))
           return -EFAULT;
-
-      pagefault_disable();
-      while (len >= sizeof(u64)) { __put_kernel_nofault(d, s, u64, Efault); d += sizeof(u64); s += sizeof(u64); len -= sizeof(u64); }
-      while (len >= sizeof(u32)) { __put_kernel_nofault(d, s, u32, Efault); d += sizeof(u32); s += sizeof(u32); len -= sizeof(u32); }
-      while (len >= sizeof(u16)) { __put_kernel_nofault(d, s, u16, Efault); d += sizeof(u16); s += sizeof(u16); len -= sizeof(u16); }
-      while (len >= sizeof(u8))  { __put_kernel_nofault(d, s, u8,  Efault); d += sizeof(u8);  s += sizeof(u8);  len -= sizeof(u8); }
-      pagefault_enable();
-      return 0;
-Efault:
-      pagefault_enable();
-      return -EFAULT;
-#else
       return copy_to_kernel_nofault(dst, src, size);
-#endif
   }
 
   #define tear_copy_from_kernel_nofault(dst, src, size) \
