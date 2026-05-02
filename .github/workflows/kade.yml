@@ -54,11 +54,11 @@ jobs:
           path: |
             ${{ env.WORKSPACE_DIR }}/.repo
             ${{ env.WORKSPACE_DIR }}/.superproject
-          key: ${{ runner.os }}-repo-${{ hashFiles('kadeflow.yaml') }}
+          key: "${{ runner.os }}-repo-${{ hashFiles('kadeflow.yaml') }}"
 
-      - name: "DEBUG: Print repo cache hit"
+      - name: DEBUG - Print repo cache hit
         run: |
-  echo "Repo cache hit: ${{ steps.cache-repo.outputs.cache-hit }}"
+          echo "Repo cache hit: ${{ steps.cache-repo.outputs.cache-hit }}"
 
       # ======================
       # 6. 恢复缓存：预编译工具链
@@ -71,22 +71,22 @@ jobs:
             ${{ env.WORKSPACE_DIR }}/prebuilts/clang
             ${{ env.WORKSPACE_DIR }}/prebuilts/rust
             ${{ env.WORKSPACE_DIR }}/prebuilts/build-tools
-          key: ${{ runner.os }}-prebuilts-${{ hashFiles('kadeflow.yaml') }}
+          key: "${{ runner.os }}-prebuilts-${{ hashFiles('kadeflow.yaml') }}"
 
-      - name: "DEBUG: Print prebuilts cache hit"
-        run: echo 'Prebuilts cache hit: ${{ steps.cache-prebuilts.outputs.cache-hit }}'
+      - name: DEBUG - Print prebuilts cache hit
+        run: |
+          echo "Prebuilts cache hit: ${{ steps.cache-prebuilts.outputs.cache-hit }}"
 
       # ======================
       # 7. 编译驱动
       # ======================
-      - name: 编译驱动 (Android ${{ matrix.android_version }})
+      - name: "编译驱动 (Android ${{ matrix.android_version }})"
         env:
           ANDROID_VERSION: "${{ matrix.android_version }}"
           KERNEL_VERSION: "${{ matrix.kernel_version }}"
           KERNEL_REPO: "${{ matrix.kernel_repo }}"
           KERNEL_BRANCH: "${{ matrix.kernel_branch }}"
         run: |
-          # 检查缓存是否已恢复（调试用）
           ls -la ${{ env.WORKSPACE_DIR }}/.repo/projects 2>/dev/null || echo "Repo cache not restored"
           ls -la ${{ env.WORKSPACE_DIR }}/prebuilts/clang 2>/dev/null || echo "Prebuilts cache not restored"
 
@@ -105,7 +105,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hook_driver_Android${{ matrix.android_version }}
+          name: "hook_driver_Android${{ matrix.android_version }}"
           path: |
             ${{ github.workspace }}/ci-kade/workspace/exports/**
             ${{ github.workspace }}/img_out/**
@@ -120,7 +120,7 @@ jobs:
           path: |
             ${{ env.WORKSPACE_DIR }}/.repo
             ${{ env.WORKSPACE_DIR }}/.superproject
-          key: ${{ steps.cache-repo.outputs.cache-primary-key }}
+          key: "${{ steps.cache-repo.outputs.cache-primary-key }}"
 
       # ======================
       # 10. 保存缓存：预编译工具链
@@ -133,4 +133,4 @@ jobs:
             ${{ env.WORKSPACE_DIR }}/prebuilts/clang
             ${{ env.WORKSPACE_DIR }}/prebuilts/rust
             ${{ env.WORKSPACE_DIR }}/prebuilts/build-tools
-          key: ${{ steps.cache-prebuilts.outputs.cache-primary-key }}
+          key: "${{ steps.cache-prebuilts.outputs.cache-primary-key }}"
