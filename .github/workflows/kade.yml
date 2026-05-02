@@ -10,43 +10,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ... 后面的内容保持不变
-          # ============================================
-          # ✅ 基准任务：android15-6.6 官方 GKI 编译
-          # 用于验证驱动是否只使用了稳定的 KMI 符号
-          # 若此版本能编译但无法加载，说明驱动用到了非 KMI 符号
-          # ============================================
           - android_version: "15"
             kernel_version: "6.6"
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "common-android15-6.6"
-
-          # ============================================
-          # 🔧 定制内核任务（按需启用）
-          # 取消下方注释并填入正确的分支名
-          # ============================================
-          #
-          # # 示例：内核 A（6.6.89-android15-8-g5aOffb447c1d-...）
-          # - android_version: "15"
-          #   kernel_version: "6.6"
-          #   kernel_repo: "https://github.com/xxx/your_kernel_repo"
-          #   kernel_branch: "your_kernel_branch_name"
-          #
-          # # 示例：内核 B（6.6.66-android15-8-g29d86c5fc9dd-...）
-          # - android_version: "15"
-          #   kernel_version: "6.6"
-          #   kernel_repo: "https://github.com/xxx/your_kernel_repo"
-          #   kernel_branch: "your_kernel_branch_name"
-
     env:
       LYENV_HOME: ${{ github.workspace }}/ci-kade
-      # lyenv 初始化后，内核源码会放在 ci-kade/workspace/android-kernel 下
       WORKSPACE_DIR: ${{ github.workspace }}/ci-kade/workspace/android-kernel
-
     steps:
-      # ======================
-      # 1. 拉取仓库代码
-      # ======================
       - name: Checkout 代码
         uses: actions/checkout@v4
 
