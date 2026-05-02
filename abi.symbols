@@ -1,3 +1,4 @@
 flip_open
 kernel_read
 kernel_write
+copy_to_kernel_nofault
