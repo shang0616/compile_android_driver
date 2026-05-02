@@ -102,8 +102,10 @@
  * ============================================================================
  * Kernel Fault Handling Compatibility
  * ============================================================================
- * GKI/Android kernels may declare copy_to_kernel_nofault but not export it
- * for loadable modules. Use probe_kernel_* to avoid modpost undefined symbols.
+ * On ARM64, kmap_atomic returns a direct-mapped linear address that is
+ * always accessible for valid PFNs. Using pagefault_disable() + memcpy()
+ * turns a recoverable fault into a fatal double-fault → kernel panic.
+ * Just use memcpy directly — PFN validity is checked before calling.
  */
 static __always_inline long tear_copy_from_kernel_nofault_impl(void *dst,
                                                                const void *src,
@@ -111,11 +113,8 @@ static __always_inline long tear_copy_from_kernel_nofault_impl(void *dst,
 {
     if (unlikely(!dst || !src))
         return -EFAULT;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,6,0)
-    return copy_from_kernel_nofault(dst, src, size);
-#else
-    return probe_kernel_read(dst, src, size);
-#endif
+    memcpy(dst, src, size);
+    return 0;
 }
 
 static __always_inline long tear_copy_to_kernel_nofault_impl(void *dst,
@@ -124,16 +123,8 @@ static __always_inline long tear_copy_to_kernel_nofault_impl(void *dst,
 {
     if (unlikely(!dst || !src))
         return -EFAULT;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,6,0)
-    /*
-     * Android 6.6 GKI 某些构建中不导出/不声明 probe_kernel_write，
-     * 这里走本地拷贝兜底，避免编译与链接失败。
-     */
     memcpy(dst, src, size);
     return 0;
-#else
-    return probe_kernel_write(dst, src, size);
-#endif
 }
 
 #define tear_copy_from_kernel_nofault(dst, src, size) \

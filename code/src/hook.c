@@ -63,9 +63,6 @@ static int prctl_entry_handler(struct kretprobe_instance *ri,
 {
     struct tear_prctl_hook_data *data;
     u32 option;
-#ifdef CONFIG_ARM64
-    const struct pt_regs *sysregs;
-#endif
     
     data = (struct tear_prctl_hook_data *)ri->data;
     
@@ -75,18 +72,13 @@ static int prctl_entry_handler(struct kretprobe_instance *ri,
 #if TEAR_DEBUG_ENABLED
     atomic64_inc(&hook_total_calls);
 #endif
-    
-#ifdef CONFIG_ARM64
-    /* ARM64 syscall: regs->regs[0] points to user pt_regs.
-     * Validate before deref — invalid ptr = kernel panic.
+
+    /*
+     * ARM64 kprobe: regs is the kernel's saved user pt_regs.
+     * regs->regs[0] = first syscall arg (option).
+     * No double-indirection — direct read is safe.
      */
-    if (regs->regs[0] > 0xffffff0000000000UL) {
-        sysregs = (const struct pt_regs *)regs->regs[0];
-        option = (u32)sysregs->regs[0];
-    } else {
-        option = (u32)regs->regs[0];
-    }
-#endif
+    option = (u32)regs->regs[0];
 
     /*
      * 快速路径：检查魔数高4位特征
@@ -123,25 +115,10 @@ static int prctl_entry_handler(struct kretprobe_instance *ri,
     data->entry_time = ktime_get_ns();
 #endif
     
-#ifdef CONFIG_ARM64
-    if (regs->regs[0] > 0xffffff0000000000UL) {
-        sysregs = (const struct pt_regs *)regs->regs[0];
-        data->cmd = sysregs->regs[1];
-        data->arg1 = sysregs->regs[2];
-        data->arg2 = sysregs->regs[3];
-        data->arg3 = sysregs->regs[4];
-    } else {
-        data->cmd = regs->regs[1];
-        data->arg1 = regs->regs[2];
-        data->arg2 = regs->regs[3];
-        data->arg3 = regs->regs[4];
-    }
-#else
     data->cmd = regs->regs[1];
     data->arg1 = regs->regs[2];
     data->arg2 = regs->regs[3];
     data->arg3 = regs->regs[4];
-#endif
 
     tear_debug("检测到调用: cmd=0x%lx\n", data->cmd);
     
@@ -171,11 +148,7 @@ static int prctl_ret_handler(struct kretprobe_instance *ri,
                                      data->arg2, data->arg3);
     
     /* 修改返回值 */
-#ifdef CONFIG_ARM64
     regs->regs[0] = result;
-#else
-    regs->regs[0] = result;
-#endif
 
     /* 添加出口抖动 */
     TEAR_JITTER();

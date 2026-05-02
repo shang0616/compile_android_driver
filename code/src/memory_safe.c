@@ -154,7 +154,7 @@ bool read_safe(pid_t pid, unsigned long addr,
     /* 获取目标进程 */
     pid_struct = find_get_pid(pid);
     if (!pid_struct) {
-        tear_debug("安全读取: 找不到PID %d\n", pid);
+        tear_crash_log(3, "pid=%d not found", pid);
         return false;
     }
     
@@ -162,7 +162,7 @@ bool read_safe(pid_t pid, unsigned long addr,
     put_pid(pid_struct);
     
     if (!task) {
-        tear_debug("安全读取: 找不到任务结构\n");
+        tear_crash_log(3, "pid=%d task NULL after find_get_pid", pid);
         return false;
     }
     
@@ -170,7 +170,7 @@ bool read_safe(pid_t pid, unsigned long addr,
     put_task_struct(task);
     
     if (!mm) {
-        tear_debug("安全读取: 找不到内存描述符\n");
+        tear_crash_log(3, "pid=%d mm NULL (zombie?)", pid);
         return false;
     }
     
@@ -195,40 +195,41 @@ bool read_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_VMA
         /* VMA permission check (full) */
         {
-            struct vm_area_struct *vma;
+            struct vm_area_struct *vma = NULL;
 
-            if (tear_mmap_read_trylock(mm)) {
-                vma = tear_find_safe_vma(mm, addr, false);
-                tear_mmap_read_unlock(mm);
+            /* 必须等待锁定成功，不允许在跳过锁的情况下继续读取，防止并发释放 */
+            tear_mmap_read_lock(mm);
+            vma = tear_find_safe_vma(mm, addr, false);
+            tear_mmap_read_unlock(mm);
 
-                if (!vma) {
+            if (!vma) {
 #if TEAR_SECURITY_VMA_ENFORCE_READ
-                    break;
+                tear_crash_log_addr(3, addr, 0, -1, "vma_reject pid=%d enforcing", pid);
+                break;
 #else
-                    /* soft: log and continue */
+                tear_crash_log_addr(3, addr, 0, -1, "vma_reject pid=%d soft", pid);
+                break;
 #endif
-                }
             }
         }
 #elif TEAR_SECURITY_CHECK_TRAP
         /* Lightweight trap-only check */
         {
-            struct vm_area_struct *vma;
+            struct vm_area_struct *vma = NULL;
 
-            if (tear_mmap_read_trylock(mm)) {
-                vma = find_vma(mm, addr);
-                if (vma && addr >= vma->vm_start) {
-                    if (tear_is_vma_trap(vma, false))
-                        vma = NULL;
-                } else {
+            tear_mmap_read_lock(mm);
+            vma = find_vma(mm, addr);
+            if (vma && addr >= vma->vm_start) {
+                if (tear_is_vma_trap(vma, false))
                     vma = NULL;
-                }
-                tear_mmap_read_unlock(mm);
+            } else {
+                vma = NULL;
+            }
+            tear_mmap_read_unlock(mm);
 
-                if (!vma) {
-                    tear_debug("safe read: trap detected addr=0x%lx\n", addr);
-                    break;
-                }
+            if (!vma) {
+                tear_crash_log_addr(3, addr, 0, -1, "trap pid=%d", pid);
+                break;
             }
         }
 #endif
@@ -236,7 +237,7 @@ bool read_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_PRESENT
         /* 安全检查2: 缺页检测 */
         if (tear_would_fault(mm, addr)) {
-            tear_debug("安全读取: 检测到缺页(跳过) addr=0x%lx\n", addr);
+            tear_crash_log_addr(3, addr, 0, -1, "would_fault pid=%d", pid);
             break;
         }
 #endif
@@ -244,14 +245,14 @@ bool read_safe(pid_t pid, unsigned long addr,
         /* 获取物理地址（已包含安全检查） */
         phys = vaddr_to_phys_safe(mm, addr);
         if (phys == 0) {
-            tear_debug("安全读取: 地址转换失败 addr=0x%lx\n", addr);
+            tear_crash_log_addr(3, addr, 0, -1, "addr_xlat_fail pid=%d", pid);
             break;
         }
         
         /* 验证PFN */
         pfn = phys >> PAGE_SHIFT;
         if (!tear_pfn_valid(pfn)) {
-            tear_debug("安全读取: PFN无效 pfn=%lu\n", pfn);
+            tear_crash_log_addr(3, addr, phys, -1, "bad_pfn pid=%d", pid);
             break;
         }
         
@@ -262,7 +263,6 @@ bool read_safe(pid_t pid, unsigned long addr,
         kmap_addr = kmap_atomic(pfn_to_page(pfn));
         kaddr = (char *)kmap_addr + offset;
         
-        /* 使用安全拷贝 - 不会在故障时崩溃 */
         ret = tear_copy_from_kernel_nofault(
             (char *)kernel_buf + copied,
             kaddr,
@@ -271,7 +271,8 @@ bool read_safe(pid_t pid, unsigned long addr,
         kunmap_atomic(kmap_addr);
         
         if (ret != 0) {
-            tear_debug("安全读取: nofault拷贝失败 ret=%ld\n", ret);
+            tear_crash_log_addr(3, addr, phys, (int)ret,
+                "nofault_copy_fail pid=%d chunk=%zu", pid, chunk);
             break;
         }
         
@@ -376,40 +377,41 @@ bool write_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_VMA
         /* VMA permission check (full, write) */
         {
-            struct vm_area_struct *vma;
+            struct vm_area_struct *vma = NULL;
 
-            if (tear_mmap_read_trylock(mm)) {
-                vma = tear_find_safe_vma(mm, addr, true);
-                tear_mmap_read_unlock(mm);
+            /* 强制获取锁，不可跳过，确保并发安全 */
+            tear_mmap_read_lock(mm);
+            vma = tear_find_safe_vma(mm, addr, true);
+            tear_mmap_read_unlock(mm);
 
-                if (!vma) {
+            if (!vma) {
 #if TEAR_SECURITY_VMA_ENFORCE_WRITE
-                    break;
+                tear_crash_log_addr(4, addr, 0, -1, "vma_reject_w pid=%d enforcing", pid);
+                break;
 #else
-                    /* soft: log and continue */
+                tear_crash_log_addr(4, addr, 0, -1, "vma_reject_w pid=%d soft", pid);
+                break;
 #endif
-                }
             }
         }
 #elif TEAR_SECURITY_CHECK_TRAP
         /* Lightweight trap-only check (write) */
         {
-            struct vm_area_struct *vma;
+            struct vm_area_struct *vma = NULL;
 
-            if (tear_mmap_read_trylock(mm)) {
-                vma = find_vma(mm, addr);
-                if (vma && addr >= vma->vm_start) {
-                    if (tear_is_vma_trap(vma, true))
-                        vma = NULL;
-                } else {
+            tear_mmap_read_lock(mm);
+            vma = find_vma(mm, addr);
+            if (vma && addr >= vma->vm_start) {
+                if (tear_is_vma_trap(vma, true))
                     vma = NULL;
-                }
-                tear_mmap_read_unlock(mm);
+            } else {
+                vma = NULL;
+            }
+            tear_mmap_read_unlock(mm);
 
-                if (!vma) {
-                    tear_debug("safe write: trap detected addr=0x%lx\n", addr);
-                    break;
-                }
+            if (!vma) {
+                tear_crash_log_addr(4, addr, 0, -1, "trap_w pid=%d", pid);
+                break;
             }
         }
 #endif
@@ -417,7 +419,7 @@ bool write_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_PRESENT
         /* 安全检查2: 缺页检测 */
         if (tear_would_fault(mm, addr)) {
-            tear_debug("安全写入: 检测到缺页 addr=0x%lx\n", addr);
+            tear_crash_log_addr(4, addr, 0, -1, "would_fault_w pid=%d", pid);
             break;
         }
 #endif
@@ -439,7 +441,6 @@ bool write_safe(pid_t pid, unsigned long addr,
         kmap_addr = kmap_atomic(pfn_to_page(pfn));
         kaddr = (char *)kmap_addr + offset;
         
-        /* 使用安全拷贝写入 */
         ret = tear_copy_to_kernel_nofault(
             kaddr,
             (char *)kernel_buf + written,
@@ -448,7 +449,8 @@ bool write_safe(pid_t pid, unsigned long addr,
         kunmap_atomic(kmap_addr);
         
         if (ret != 0) {
-            tear_debug("安全写入: nofault拷贝失败 ret=%ld\n", ret);
+            tear_crash_log_addr(4, addr, phys, (int)ret,
+                "nofault_copy_fail_w pid=%d chunk=%zu", pid, chunk);
             break;
         }
         

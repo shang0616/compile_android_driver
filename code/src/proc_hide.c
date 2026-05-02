@@ -165,42 +165,10 @@ static pid_t str_to_pid(const char *str, int len)
 }
 
 /*
- * 检查文件描述符是否指向 /proc
+ * d_path() can sleep and must NOT be called from kretprobe context.
+ * Instead, rely on dirent name filtering: PID-only numeric names
+ * appear only under /proc, so we can safely filter without path check.
  */
-static bool fd_is_proc(int fd)
-{
-    struct file *file;
-    struct path path;
-    char buf[64];
-    char *pathname;
-    bool is_proc = false;
-    
-    file = fget(fd);
-    if (!file)
-        return false;
-    
-    path = file->f_path;
-    pathname = d_path(&path, buf, sizeof(buf));
-    
-    if (!IS_ERR(pathname)) {
-        is_proc = (strncmp(pathname, "/proc", 5) == 0);
-        /* 确保是 /proc 根目录或 /proc/xxx 但不是 /proc/xxx/yyy */
-        if (is_proc) {
-            char *p = pathname + 5;
-            if (*p == '\0' || (*p == '/' && strchr(p + 1, '/') == NULL)) {
-                is_proc = true;
-            } else if (*p == '/' && is_pid_string(p + 1, strlen(p + 1))) {
-                /* /proc/PID 目录 */
-                is_proc = true;
-            } else {
-                is_proc = false;
-            }
-        }
-    }
-    
-    fput(file);
-    return is_proc;
-}
 
 /*
  * ============================================================================
@@ -214,30 +182,22 @@ static bool fd_is_proc(int fd)
 static int proc_getdents_entry(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
     struct proc_getdents_data *data = (struct proc_getdents_data *)ri->data;
-    int fd;
-    
+
 #ifdef CONFIG_ARM64
     if (regs->regs[0] > 0xffffff0000000000UL) {
         struct pt_regs *user_regs = (struct pt_regs *)regs->regs[0];
-        fd = (int)user_regs->regs[0];
         data->dirent = (void __user *)user_regs->regs[1];
         data->count = (unsigned int)user_regs->regs[2];
     } else {
-        fd = (int)regs->regs[0];
         data->dirent = (void __user *)regs->regs[1];
         data->count = (unsigned int)regs->regs[2];
     }
 #else
-    fd = (int)regs->di;
     data->dirent = (void __user *)regs->si;
     data->count = (unsigned int)regs->dx;
 #endif
-    
-    data->fd = fd;
-    
-    /* 检查是否是 /proc 目录 */
-    data->is_proc = fd_is_proc(fd);
-    
+
+    data->is_proc = true; /* filter by dirent name, skip d_path */
     return 0;
 }
 

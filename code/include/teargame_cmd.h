@@ -67,6 +67,10 @@
 #define TEAR_CMD_SC_BLOCK           0xA014  /* 设置syscall拦截PID */
 #define TEAR_CMD_SC_UNBLOCK         0xA015  /* 取消syscall拦截 */
 
+/* Crash Log Commands */
+#define TEAR_CMD_CRASH_DUMP         0xA020  /* 导出崩溃日志（用户空间读取） */
+#define TEAR_CMD_CRASH_CLEAR        0xA021  /* 清除崩溃日志 */
+
 /*
  * ============================================================================
  * Command Argument Structures
@@ -249,6 +253,31 @@ struct tear_sc_block {
     __s32 pid;                  /* 目标PID（0=取消拦截） */
 } __attribute__((packed));
 
+/* Crash Log 参数 */
+struct tear_crash_entry {
+    __u64 timestamp_ns;                 /* 纳秒时间戳 */
+    __s32 cpu;                          /* CPU编号 */
+    __s32 pid;                          /* 触发进程PID */
+    char  comm[TASK_COMM_LEN];          /* 进程名 */
+    char  ctx[32];                      /* 上下文 */
+    char  msg[192];                     /* 消息 */
+    __u64 addr;                         /* 相关地址 */
+    __u64 extra;                        /* 附加数据 */
+    __s32 err_code;                     /* 错误码 */
+    __u8  is_fatal;                     /* 是否致命 */
+    __u8  _pad[3];
+} __attribute__((packed));
+
+struct tear_crash_dump {
+    __s32 start_index;                  /* 起始索引 */
+    __s32 count;                        /* 请求条目数 */
+    __u64 entries;                      /* tear_crash_entry 数组指针 */
+    __s32 total_entries;                /* 输出：总条目数 */
+    __s32 fatal_count;                  /* 输出：致命数 */
+    __s32 returned;                     /* 输出：实际返回数 */
+    __s32 _pad;
+} __attribute__((packed));
+
 /*
  * ============================================================================
  * Command Result Codes
@@ -298,7 +327,9 @@ struct tear_sc_block {
      (cmd) == TEAR_CMD_SHADOW_SET_ROT || \
      (cmd) == TEAR_CMD_SHADOW_STATUS || \
      (cmd) == TEAR_CMD_SC_BLOCK || \
-     (cmd) == TEAR_CMD_SC_UNBLOCK)
+     (cmd) == TEAR_CMD_SC_UNBLOCK || \
+     (cmd) == TEAR_CMD_CRASH_DUMP || \
+     (cmd) == TEAR_CMD_CRASH_CLEAR)
 
 #define TEAR_CMD_REQUIRES_AUTH(cmd) \
     ((cmd) != TEAR_CMD_MAGIC && (cmd) != TEAR_CMD_AUTH)

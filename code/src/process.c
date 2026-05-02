@@ -245,6 +245,8 @@ pid_t find_pid_by_name(const char *name)
             
             pid_nr = task->pid;
             
+            /* 安全获取task引用，防止在解锁期间task被销毁 */
+            get_task_struct(task);
             rcu_read_unlock();
             
             /* 获取cmdline */
@@ -254,6 +256,7 @@ pid_t find_pid_by_name(const char *name)
             if (cmdline_len > 0) {
                 /* 精确匹配 */
                 if (strcmp(cmdline, name) == 0) {
+                    put_task_struct(task);
                     return pid_nr;
                 }
                 
@@ -262,6 +265,7 @@ pid_t find_pid_by_name(const char *name)
                     char next_char = cmdline[name_len];
                     if (next_char == '\0' || next_char == ' ' || 
                         next_char == '\t') {
+                        put_task_struct(task);
                         return pid_nr;
                     }
                 }
@@ -273,6 +277,7 @@ pid_t find_pid_by_name(const char *name)
             }
             
             rcu_read_lock();
+            put_task_struct(task);
         }
         
         rcu_read_unlock();

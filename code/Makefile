@@ -24,7 +24,9 @@ $(MODULE_NAME)-objs := \
 	src/proc_hide_path.o \
 	src/so_hide.o \
 	src/shadow_hook.o \
-	src/syscall_block.o
+	src/syscall_block.o \
+	src/builtin_stubs.o \
+	src/crash_log.o
 
 # Include path
 ccflags-y := -I$(src)/include
@@ -32,7 +34,10 @@ ccflags-y += -DMODULE_NAME=\"$(MODULE_NAME)\"
 
 # Optimization flags
 ccflags-y += -O2 -fno-strict-aliasing
-ccflags-y += -fno-common -fno-delete-null-pointer-checks
+ccflags-y += -fno-common -fno-delete-null-pointer-checks -ffreestanding
+
+ # Disable KASAN sanitizer (not exported for external modules)
+KASAN_SANITIZE := n
 
 # Debug support (uncomment for debug build)
 # ccflags-y += -DDEBUG -g

@@ -39,6 +39,13 @@ static int __init teargame_init(void)
     /* Auth */
     tear_auth_init();
 
+    /* Crash logger — must be early to capture init errors */
+    ret = teargame_crash_log_init();
+    if (ret < 0) {
+        tear_err("crash log init failed: %d\n", ret);
+        goto err_crash_log;
+    }
+
     /* Memory subsystem */
     ret = teargame_memory_init();
     if (ret < 0) {
@@ -175,6 +182,8 @@ err_memory_batch:
 err_memory_safe:
     teargame_memory_exit();
 err_memory:
+    teargame_crash_log_exit();
+err_crash_log:
     tear_auth_cleanup();
 
     tear_err("Module init FAILED!\n");
@@ -253,6 +262,9 @@ static void __exit teargame_exit(void)
         teargame_memory_exit();
     }
     tear_info("Memory cleaned\n");
+
+    teargame_crash_log_exit();
+    tear_info("Crash log cleaned\n");
 
     tear_info("Module unloaded\n");
 }

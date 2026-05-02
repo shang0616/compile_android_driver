@@ -710,23 +710,23 @@ static inline phys_addr_t tear_vaddr_to_phys_secure(struct mm_struct *mm,
     if (page_size)
         *page_size = PAGE_SIZE;
     
-    /*
-     * Keep mmap lock across VMA+page-table checks to avoid races with
-     * concurrent unmap/mprotect during long-running memory scans.
-     */
+    /* 扩大mmap_read_lock范围，保护整个VMA和页表遍历过程，防止并发munmap导致崩溃 */
     tear_mmap_read_lock(mm);
 
 #if TEAR_SECURITY_CHECK_VMA
     {
-        struct vm_area_struct *vma = tear_find_safe_vma(mm, vaddr, write);
+        struct vm_area_struct *vma;
+        vma = tear_find_safe_vma(mm, vaddr, write);
         if (!vma) {
             tear_security_debug("VMA check failed vaddr=0x%lx\n", vaddr);
-            goto out_unlock;
+            tear_mmap_read_unlock(mm);
+            return 0;
         }
     }
 #elif TEAR_SECURITY_CHECK_TRAP
     {
-        struct vm_area_struct *vma = find_vma(mm, vaddr);
+        struct vm_area_struct *vma;
+        vma = find_vma(mm, vaddr);
         if (vma && vaddr >= vma->vm_start) {
             if (tear_is_vma_trap(vma, write))
                 vma = NULL;
@@ -735,7 +735,8 @@ static inline phys_addr_t tear_vaddr_to_phys_secure(struct mm_struct *mm,
         }
         if (!vma) {
             tear_security_debug("Trap detected vaddr=0x%lx\n", vaddr);
-            goto out_unlock;
+            tear_mmap_read_unlock(mm);
+            return 0;
         }
     }
 #endif
@@ -822,7 +823,6 @@ static inline phys_addr_t tear_vaddr_to_phys_secure(struct mm_struct *mm,
     
 out:
     rcu_read_unlock();
-out_unlock:
     tear_mmap_read_unlock(mm);
     return phys;
 }

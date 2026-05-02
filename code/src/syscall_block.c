@@ -71,7 +71,7 @@ static const char *sc_mmap_symbols[] = {
     "do_mmap",
     "ksys_mmap_pgoff",     /* 6.6+ fallback */
 };
-static struct kprobe sc_kp_mmap;
+static struct kprobe sc_kp_mmap = {
     .pre_handler = sc_mmap_pre,
 };
 

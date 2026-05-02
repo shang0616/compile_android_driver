@@ -221,7 +221,7 @@ static noinline void inject_fpsimd(u32 rot0, u32 rot1, u32 rot2)
     );
 
     {
-        u32 fpcr, fpsr;
+        u64 fpcr, fpsr;
         asm volatile("mrs %0, fpcr" : "=r"(fpcr));
         asm volatile("mrs %0, fpsr" : "=r"(fpsr));
         st->fpcr = fpcr;
@@ -336,7 +336,7 @@ static int handle_fault(unsigned long addr, unsigned long esr,
 
 /* ---- single-step callback ---- */
 
-static int step_cb(struct pt_regs *regs, unsigned long esr)
+static int step_cb(struct pt_regs *regs, unsigned int esr)
 {
     struct shadow_entry *e;
     bool handled = false;
@@ -576,8 +576,9 @@ int teargame_shadow_hook_init(void)
     }
 
     pr_info("shadow: init (kernel %d.%d.%d)\n",
-            LINUX_VERSION_MAJOR, LINUX_VERSION_PATCHLEVEL,
-            LINUX_VERSION_SUBLEVEL);
+            (LINUX_VERSION_CODE >> 16) & 0xFF,
+            (LINUX_VERSION_CODE >> 8) & 0xFF,
+            LINUX_VERSION_CODE & 0xFF);
 
     ret = resolve_kln();
     if (ret) return ret;

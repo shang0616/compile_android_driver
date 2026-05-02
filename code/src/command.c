@@ -1148,6 +1148,14 @@ dispatch:
         tear_sc_block_set(0);
         return 0;
 
+    /* Crash Log */
+    case TEAR_CMD_CRASH_DUMP:
+        return tear_crash_dump((struct tear_crash_dump __user *)arg1);
+
+    case TEAR_CMD_CRASH_CLEAR:
+        tear_crash_clear();
+        return 0;
+
     default:
         tear_debug("未知命令: 0x%lx\n", cmd);
         return -EINVAL;
