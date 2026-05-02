@@ -197,6 +197,29 @@ static struct kretprobe krp_chdir = {
 };
 
 static bool hooks_installed;
+static bool faccessat_hook_installed;
+
+static int register_faccessat_hook_with_fallback(void)
+{
+    static const char *const candidates[] = {
+        "__arm64_sys_faccessat",
+        "__arm64_sys_faccessat2",
+    };
+    int i;
+    int ret = -ENOENT;
+
+    for (i = 0; i < ARRAY_SIZE(candidates); i++) {
+        krp_faccessat.kp.symbol_name = candidates[i];
+        ret = register_kretprobe(&krp_faccessat);
+        if (ret == 0) {
+            faccessat_hook_installed = true;
+            tear_debug("proc_path_hide: faccessat hook symbol=%s\n", candidates[i]);
+            return 0;
+        }
+    }
+
+    return ret;
+}
 
 /* ---- 公共 API ---- */
 
@@ -215,7 +238,7 @@ int teargame_proc_path_hide_init(void)
         return ret;
     }
 
-    ret = register_kretprobe(&krp_faccessat);
+    ret = register_faccessat_hook_with_fallback();
     if (ret < 0) {
         tear_warn("proc_path_hide: faccessat hook failed: %d\n", ret);
         unregister_kretprobe(&krp_newfstatat);
@@ -226,7 +249,10 @@ int teargame_proc_path_hide_init(void)
     if (ret < 0) {
         tear_warn("proc_path_hide: chdir hook failed: %d\n", ret);
         unregister_kretprobe(&krp_newfstatat);
-        unregister_kretprobe(&krp_faccessat);
+        if (faccessat_hook_installed) {
+            unregister_kretprobe(&krp_faccessat);
+            faccessat_hook_installed = false;
+        }
         return ret;
     }
 
@@ -241,7 +267,10 @@ void teargame_proc_path_hide_exit(void)
         return;
 
     unregister_kretprobe(&krp_chdir);
-    unregister_kretprobe(&krp_faccessat);
+    if (faccessat_hook_installed) {
+        unregister_kretprobe(&krp_faccessat);
+        faccessat_hook_installed = false;
+    }
     unregister_kretprobe(&krp_newfstatat);
     hooks_installed = false;
 

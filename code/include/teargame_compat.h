@@ -96,11 +96,7 @@
  * Copy from/to User Compatibility
  * ============================================================================
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0)
-  #define tear_access_ok(addr, size) access_ok((addr), (size))
-#else
-  #define tear_access_ok(addr, size) access_ok(VERIFY_READ, (addr), (size))
-#endif
+#define tear_access_ok(addr, size) access_ok((addr), (size))
 
 /*
  * ============================================================================

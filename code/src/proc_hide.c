@@ -18,6 +18,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include <linux/fs.h>
+#include <linux/file.h>
 #include <linux/kprobes.h>
 #include <linux/sched.h>
 #include <linux/pid.h>
@@ -168,17 +169,17 @@ static pid_t str_to_pid(const char *str, int len)
  */
 static bool fd_is_proc(int fd)
 {
-    struct fd f;
+    struct file *file;
     struct path path;
     char buf[64];
     char *pathname;
     bool is_proc = false;
     
-    f = fdget(fd);
-    if (!f.file)
+    file = fget(fd);
+    if (!file)
         return false;
     
-    path = f.file->f_path;
+    path = file->f_path;
     pathname = d_path(&path, buf, sizeof(buf));
     
     if (!IS_ERR(pathname)) {
@@ -197,7 +198,7 @@ static bool fd_is_proc(int fd)
         }
     }
     
-    fdput(f);
+    fput(file);
     return is_proc;
 }
 
