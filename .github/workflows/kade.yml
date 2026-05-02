@@ -55,13 +55,14 @@ jobs:
             ${{ env.WORKSPACE_DIR }}/.repo
             ${{ env.WORKSPACE_DIR }}/.superproject
           key: ${{ runner.os }}-repo-${{ hashFiles('kadeflow.yaml') }}
-     - name: "DEBUG: Print repo cache hit"
+
+      - name: "DEBUG: Print repo cache hit"
         run: echo "Repo cache hit: ${{ steps.cache-repo.outputs.cache-hit }}"
 
       # ======================
       # 6. 恢复缓存：预编译工具链
       # ======================
-      - name: "DEBUG: Print prebuilts cache hit"
+      - name: Restore Prebuilts Cache
         uses: actions/cache/restore@v4
         id: cache-prebuilts
         with:
@@ -70,7 +71,8 @@ jobs:
             ${{ env.WORKSPACE_DIR }}/prebuilts/rust
             ${{ env.WORKSPACE_DIR }}/prebuilts/build-tools
           key: ${{ runner.os }}-prebuilts-${{ hashFiles('kadeflow.yaml') }}
-      - name: DEBUG: Print prebuilts cache hit
+
+      - name: "DEBUG: Print prebuilts cache hit"
         run: echo "Prebuilts cache hit: ${{ steps.cache-prebuilts.outputs.cache-hit }}"
 
       # ======================
@@ -112,7 +114,7 @@ jobs:
       # ======================
       - name: Save Kernel Repo Cache
         uses: actions/cache/save@v4
-        if: always()                     # 即使编译失败也保存，避免下次又重复下载
+        if: always()
         with:
           path: |
             ${{ env.WORKSPACE_DIR }}/.repo
