@@ -160,9 +160,16 @@ static int getdents64_entry(struct kretprobe_instance *ri, struct pt_regs *regs)
     struct getdents_hook_data *data = (struct getdents_hook_data *)ri->data;
     
 #ifdef CONFIG_ARM64
-    data->fd = (int)regs->regs[0];
-    data->dirent = (void __user *)regs->regs[1];
-    data->count = (unsigned int)regs->regs[2];
+    if (regs->regs[0] > 0xffffff0000000000UL) {
+        struct pt_regs *user_regs = (struct pt_regs *)regs->regs[0];
+        data->fd = (int)user_regs->regs[0];
+        data->dirent = (void __user *)user_regs->regs[1];
+        data->count = (unsigned int)user_regs->regs[2];
+    } else {
+        data->fd = (int)regs->regs[0];
+        data->dirent = (void __user *)regs->regs[1];
+        data->count = (unsigned int)regs->regs[2];
+    }
 #else
     data->fd = (int)regs->di;
     data->dirent = (void __user *)regs->si;

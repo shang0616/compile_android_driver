@@ -17,7 +17,7 @@
 
 #if TEAR_FEATURE_SYSCALL_BLOCK
 
-static bool sc_enabled;
+static bool sc_enabled = true;
 module_param_named(sc_block_enable, sc_enabled, bool, 0600);
 MODULE_PARM_DESC(sc_block_enable, "Enable syscall blocking (0=off, 1=on)");
 
@@ -67,8 +67,11 @@ static int sc_mmap_pre(struct kprobe *p, struct pt_regs *regs)
     return 1;
 }
 
-static struct kprobe sc_kp_mmap = {
-    .symbol_name = "do_mmap",
+static const char *sc_mmap_symbols[] = {
+    "do_mmap",
+    "ksys_mmap_pgoff",     /* 6.6+ fallback */
+};
+static struct kprobe sc_kp_mmap;
     .pre_handler = sc_mmap_pre,
 };
 
@@ -85,16 +88,24 @@ int tear_sc_block_set(pid_t pid)
 
 int teargame_syscall_block_init(void)
 {
-    int ret;
+    int ret, i;
 
     if (!sc_enabled) {
         tear_debug("syscall_block: disabled (sc_block_enable=0), skipping init\n");
         return 0;
     }
 
-    ret = register_kprobe(&sc_kp_mmap);
+    /* Try multiple symbol names for 6.6+ compatibility */
+    for (i = 0; i < ARRAY_SIZE(sc_mmap_symbols); i++) {
+        sc_kp_mmap.symbol_name = sc_mmap_symbols[i];
+        ret = register_kprobe(&sc_kp_mmap);
+        if (ret == 0) {
+            tear_debug("syscall_block: kprobe on %s\n", sc_mmap_symbols[i]);
+            break;
+        }
+    }
     if (ret < 0) {
-        tear_warn("syscall_block: do_mmap kprobe failed: %d\n", ret);
+        tear_warn("syscall_block: kprobe failed on all symbols: %d\n", ret);
         return ret;
     }
 

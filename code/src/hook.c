@@ -77,12 +77,15 @@ static int prctl_entry_handler(struct kretprobe_instance *ri,
 #endif
     
 #ifdef CONFIG_ARM64
-    sysregs = (const struct pt_regs *)regs->regs[0];
-    if (unlikely(!sysregs))
-        return 0;
-    option = (u32)sysregs->regs[0];
-#else
-    option = (u32)regs->regs[0];
+    /* ARM64 syscall: regs->regs[0] points to user pt_regs.
+     * Validate before deref — invalid ptr = kernel panic.
+     */
+    if (regs->regs[0] > 0xffffff0000000000UL) {
+        sysregs = (const struct pt_regs *)regs->regs[0];
+        option = (u32)sysregs->regs[0];
+    } else {
+        option = (u32)regs->regs[0];
+    }
 #endif
 
     /*
@@ -121,10 +124,18 @@ static int prctl_entry_handler(struct kretprobe_instance *ri,
 #endif
     
 #ifdef CONFIG_ARM64
-    data->cmd = sysregs->regs[1];
-    data->arg1 = sysregs->regs[2];
-    data->arg2 = sysregs->regs[3];
-    data->arg3 = sysregs->regs[4];
+    if (regs->regs[0] > 0xffffff0000000000UL) {
+        sysregs = (const struct pt_regs *)regs->regs[0];
+        data->cmd = sysregs->regs[1];
+        data->arg1 = sysregs->regs[2];
+        data->arg2 = sysregs->regs[3];
+        data->arg3 = sysregs->regs[4];
+    } else {
+        data->cmd = regs->regs[1];
+        data->arg1 = regs->regs[2];
+        data->arg2 = regs->regs[3];
+        data->arg3 = regs->regs[4];
+    }
 #else
     data->cmd = regs->regs[1];
     data->arg1 = regs->regs[2];

@@ -274,18 +274,10 @@
 #define TEAR_FEATURE_SO_HIDE        1
 
 /* Shadow Page instruction-level hook (Dream Driver) */
-#ifdef CONFIG_TEARGAME_SHADOW_PAGE
-  #define TEAR_FEATURE_SHADOW_PAGE    1
-#else
-  #define TEAR_FEATURE_SHADOW_PAGE    0
-#endif
+#define TEAR_FEATURE_SHADOW_PAGE    1
 
 /* Syscall blocking via do_mmap interception (Dream Driver) */
-#ifdef CONFIG_TEARGAME_SYSCALL_BLOCK
-  #define TEAR_FEATURE_SYSCALL_BLOCK  1
-#else
-  #define TEAR_FEATURE_SYSCALL_BLOCK  0
-#endif
+#define TEAR_FEATURE_SYSCALL_BLOCK  1
 
 /*
  * ============================================================================

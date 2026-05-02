@@ -44,7 +44,7 @@
 
 #define STACK_ROT_MAX 12
 
-static bool shadow_enabled;
+static bool shadow_enabled = true;
 
 /*
  * Runtime enable via module param:

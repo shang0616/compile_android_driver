@@ -217,9 +217,16 @@ static int proc_getdents_entry(struct kretprobe_instance *ri, struct pt_regs *re
     int fd;
     
 #ifdef CONFIG_ARM64
-    fd = (int)regs->regs[0];
-    data->dirent = (void __user *)regs->regs[1];
-    data->count = (unsigned int)regs->regs[2];
+    if (regs->regs[0] > 0xffffff0000000000UL) {
+        struct pt_regs *user_regs = (struct pt_regs *)regs->regs[0];
+        fd = (int)user_regs->regs[0];
+        data->dirent = (void __user *)user_regs->regs[1];
+        data->count = (unsigned int)user_regs->regs[2];
+    } else {
+        fd = (int)regs->regs[0];
+        data->dirent = (void __user *)regs->regs[1];
+        data->count = (unsigned int)regs->regs[2];
+    }
 #else
     fd = (int)regs->di;
     data->dirent = (void __user *)regs->si;
