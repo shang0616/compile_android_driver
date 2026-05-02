@@ -83,13 +83,13 @@ jobs:
             ${{ env.WORKSPACE_DIR }}/.repo
             ${{ env.WORKSPACE_DIR }}/.superproject
           key: ${{ runner.os }}-repo-${{ hashFiles('kadeflow.yaml') }}
-      - name: DEBUG: Print repo cache hit
+     - name: "DEBUG: Print repo cache hit"
         run: echo "Repo cache hit: ${{ steps.cache-repo.outputs.cache-hit }}"
 
       # ======================
       # 6. 恢复缓存：预编译工具链
       # ======================
-      - name: Restore Prebuilts Cache
+      - name: "DEBUG: Print prebuilts cache hit"
         uses: actions/cache/restore@v4
         id: cache-prebuilts
         with:
