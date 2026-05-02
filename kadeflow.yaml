@@ -38,9 +38,11 @@ kade:
         args: []
         artifacts_dir: "out"
 
-# ABI 部分暂时关闭，避免找不到 abi.symbols 文件
 abi:
-  upstream_patch: false
+  upstream_patch: true
+  symbols_file: "${GITHUB_WORKSPACE}/abi.symbols"
+  sort: false
+  replace: false
 
 flow:
   steps:
