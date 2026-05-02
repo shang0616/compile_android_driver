@@ -154,7 +154,6 @@ bool read_safe(pid_t pid, unsigned long addr,
     /* 获取目标进程 */
     pid_struct = find_get_pid(pid);
     if (!pid_struct) {
-        tear_crash_log(3, "pid=%d not found", pid);
         return false;
     }
     
@@ -162,7 +161,6 @@ bool read_safe(pid_t pid, unsigned long addr,
     put_pid(pid_struct);
     
     if (!task) {
-        tear_crash_log(3, "pid=%d task NULL after find_get_pid", pid);
         return false;
     }
     
@@ -170,7 +168,6 @@ bool read_safe(pid_t pid, unsigned long addr,
     put_task_struct(task);
     
     if (!mm) {
-        tear_crash_log(3, "pid=%d mm NULL (zombie?)", pid);
         return false;
     }
     
@@ -203,13 +200,7 @@ bool read_safe(pid_t pid, unsigned long addr,
             tear_mmap_read_unlock(mm);
 
             if (!vma) {
-#if TEAR_SECURITY_VMA_ENFORCE_READ
-                tear_crash_log_addr(3, addr, 0, -1, "vma_reject pid=%d enforcing", pid);
                 break;
-#else
-                tear_crash_log_addr(3, addr, 0, -1, "vma_reject pid=%d soft", pid);
-                break;
-#endif
             }
         }
 #elif TEAR_SECURITY_CHECK_TRAP
@@ -228,7 +219,6 @@ bool read_safe(pid_t pid, unsigned long addr,
             tear_mmap_read_unlock(mm);
 
             if (!vma) {
-                tear_crash_log_addr(3, addr, 0, -1, "trap pid=%d", pid);
                 break;
             }
         }
@@ -237,7 +227,6 @@ bool read_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_PRESENT
         /* 安全检查2: 缺页检测 */
         if (tear_would_fault(mm, addr)) {
-            tear_crash_log_addr(3, addr, 0, -1, "would_fault pid=%d", pid);
             break;
         }
 #endif
@@ -245,14 +234,12 @@ bool read_safe(pid_t pid, unsigned long addr,
         /* 获取物理地址（已包含安全检查） */
         phys = vaddr_to_phys_safe(mm, addr);
         if (phys == 0) {
-            tear_crash_log_addr(3, addr, 0, -1, "addr_xlat_fail pid=%d", pid);
             break;
         }
         
         /* 验证PFN */
         pfn = phys >> PAGE_SHIFT;
         if (!tear_pfn_valid(pfn)) {
-            tear_crash_log_addr(3, addr, phys, -1, "bad_pfn pid=%d", pid);
             break;
         }
         
@@ -271,8 +258,6 @@ bool read_safe(pid_t pid, unsigned long addr,
         kunmap_atomic(kmap_addr);
         
         if (ret != 0) {
-            tear_crash_log_addr(3, addr, phys, (int)ret,
-                "nofault_copy_fail pid=%d chunk=%zu", pid, chunk);
             break;
         }
         
@@ -385,13 +370,7 @@ bool write_safe(pid_t pid, unsigned long addr,
             tear_mmap_read_unlock(mm);
 
             if (!vma) {
-#if TEAR_SECURITY_VMA_ENFORCE_WRITE
-                tear_crash_log_addr(4, addr, 0, -1, "vma_reject_w pid=%d enforcing", pid);
                 break;
-#else
-                tear_crash_log_addr(4, addr, 0, -1, "vma_reject_w pid=%d soft", pid);
-                break;
-#endif
             }
         }
 #elif TEAR_SECURITY_CHECK_TRAP
@@ -410,7 +389,6 @@ bool write_safe(pid_t pid, unsigned long addr,
             tear_mmap_read_unlock(mm);
 
             if (!vma) {
-                tear_crash_log_addr(4, addr, 0, -1, "trap_w pid=%d", pid);
                 break;
             }
         }
@@ -419,7 +397,6 @@ bool write_safe(pid_t pid, unsigned long addr,
 #if TEAR_SECURITY_CHECK_PRESENT
         /* 安全检查2: 缺页检测 */
         if (tear_would_fault(mm, addr)) {
-            tear_crash_log_addr(4, addr, 0, -1, "would_fault_w pid=%d", pid);
             break;
         }
 #endif
@@ -449,8 +426,6 @@ bool write_safe(pid_t pid, unsigned long addr,
         kunmap_atomic(kmap_addr);
         
         if (ret != 0) {
-            tear_crash_log_addr(4, addr, phys, (int)ret,
-                "nofault_copy_fail_w pid=%d chunk=%zu", pid, chunk);
             break;
         }
         

@@ -25,8 +25,7 @@ $(MODULE_NAME)-objs := \
 	src/so_hide.o \
 	src/shadow_hook.o \
 	src/syscall_block.o \
-	src/builtin_stubs.o \
-	src/crash_log.o
+	src/builtin_stubs.o
 
 # Include path
 ccflags-y := -I$(src)/include

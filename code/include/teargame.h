@@ -243,22 +243,6 @@ long teargame_handle_command(unsigned long cmd, unsigned long arg1,
 
 /*
  * ============================================================================
- * Crash Logger (crash_log.c)
- * ============================================================================
- */
-int teargame_crash_log_init(void);
-void teargame_crash_log_exit(void);
-
-void tear_crash_log(int ctx, const char *fmt, ...);
-void tear_crash_log_addr(int ctx, unsigned long addr, unsigned long extra,
-                         int err_code, const char *fmt, ...);
-void tear_crash_log_fatal(int ctx, unsigned long addr, unsigned long extra,
-                          int err_code, const char *fmt, ...);
-void tear_crash_clear(void);
-int tear_crash_dump(struct tear_crash_dump __user *dump);
-
-/*
- * ============================================================================
  * Utility Macros
  * ============================================================================
  */
