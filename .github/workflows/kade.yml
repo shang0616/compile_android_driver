@@ -15,7 +15,7 @@ jobs:
             kernel_repo: "https://android.googlesource.com/kernel/common"
             kernel_branch: "common-android15-6.6"
     env:
-      LYENV_HOME: ${{ github.workspace }}/ci-kade
+     LYENV_HOME: "${{ github.workspace }}/ci-kade"
       WORKSPACE_DIR: ${{ github.workspace }}/ci-kade/workspace/android-kernel
     steps:
       - name: Checkout 代码
