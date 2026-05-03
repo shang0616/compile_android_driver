@@ -81,9 +81,14 @@
  * PTE Mapping Compatibility  
  * ============================================================================
  * Linux 5.11+: pte_offset_map may return NULL
- * Linux 6.5+: pte_offset_map_lock changes
+ * Linux 6.5+: pte_offset_map_lock changes, __pte_offset_map might not be exported
+ * On ARM64 (no highmem), pte_offset_kernel works for user pages as well.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
+#if defined(CONFIG_ARM64) || defined(__aarch64__)
+  /* Avoid using __pte_offset_map which might not be exported in some GKI versions */
+  #define tear_pte_offset_map(pmd, addr) pte_offset_kernel(pmd, addr)
+  #define tear_pte_unmap(pte)            do { } while(0)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0)
   #define tear_pte_offset_map(pmd, addr) pte_offset_map(pmd, addr)
   #define tear_pte_unmap(pte)            pte_unmap(pte)
 #else
